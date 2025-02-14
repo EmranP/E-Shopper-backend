@@ -17,7 +17,7 @@ const port = process.env.PORT
 defaultMiddleware(app, express)
 
 // Routes =================
-console.log('test branch')
+
 // Глобальный обработчик ошибок
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
 	logger.error(`[ERROR]: ${err.message}`)
