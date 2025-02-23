@@ -6,6 +6,7 @@ import express, {
 } from 'express'
 import { checkDB } from './config/db.config'
 import { defaultMiddleware } from './middlewares/appMiddleware.middleware'
+import router from './routes/router.routes'
 import logger from './utils/logger.utils'
 
 dotenv.config()
@@ -17,6 +18,7 @@ const port = process.env.PORT
 defaultMiddleware(app, express)
 
 // Routes =================
+app.use('/api', router)
 
 // Глобальный обработчик ошибок
 app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
