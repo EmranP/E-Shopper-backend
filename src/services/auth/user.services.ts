@@ -1,6 +1,12 @@
 import bcrypt from 'bcrypt'
 import { v4 as uuidV4 } from 'uuid'
-import { createUser, getUserByEmail } from '../../models/auth/user.model'
+import {
+	createUser,
+	getUserByActivateLink,
+	getUserByEmail,
+	updateUserByIsActivated,
+	type IUser,
+} from '../../models/auth/user.model'
 import { UserDTO } from '../../utils/dtos/user-dto.utils'
 import {
 	TokenGenerationError,
@@ -39,7 +45,10 @@ class UserService {
 		const activationLink = uuidV4()
 
 		const user = await createUser(login, email, hashedPassword, activationLink)
-		await mailService.sendActivationMail(email, activationLink)
+		await mailService.sendActivationMail(
+			email,
+			`${process.env.API_URL}/api/activate/${activationLink}`
+		)
 
 		const userDTO = new UserDTO(user)
 		const tokens = await tokenService.generateToken({ ...userDTO })
@@ -54,6 +63,22 @@ class UserService {
 			...tokens,
 			user: userDTO,
 		}
+	}
+
+	async activate(activationLink: string): Promise<IUser> {
+		const user = await getUserByActivateLink(activationLink)
+
+		if (!user) {
+			throw new Error('Некорректная ссылка активации')
+		}
+
+		const updatedUser = await updateUserByIsActivated(activationLink, true)
+
+		if (!updatedUser) {
+			throw new Error('Ошибка при обновлении статуса активации')
+		}
+
+		return updatedUser
 	}
 }
 
