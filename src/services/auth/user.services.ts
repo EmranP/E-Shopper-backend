@@ -8,10 +8,7 @@ import {
 	type IUser,
 } from '../../models/auth/user.model'
 import { UserDTO } from '../../utils/dtos/user-dto.utils'
-import {
-	TokenGenerationError,
-	UserAlreadyExistsError,
-} from '../../utils/exists-error.utils'
+import { ApiError, TokenGenerationError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 import { mailService } from './mail.services'
 import { tokenService, type IAccessTokenService } from './token.services'
@@ -35,10 +32,11 @@ class UserService {
 		password,
 	}: IUserServiceRegistrationProps): Promise<IUserServiceRegistration> {
 		const candidate = await getUserByEmail(email)
+		const errorMessage = `Пользователь с почтой ${email} уже существует`
 
 		if (candidate) {
-			this.loggerError.error(`Пользователь с почтой ${email} уже существует`)
-			throw new UserAlreadyExistsError(email)
+			this.loggerError.error(errorMessage)
+			throw ApiError.BadRequest(errorMessage)
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10)
@@ -69,13 +67,13 @@ class UserService {
 		const user = await getUserByActivateLink(activationLink)
 
 		if (!user) {
-			throw new Error('Некорректная ссылка активации')
+			throw ApiError.BadRequest('Некорректная ссылка активации')
 		}
 
 		const updatedUser = await updateUserByIsActivated(activationLink, true)
 
 		if (!updatedUser) {
-			throw new Error('Ошибка при обновлении статуса активации')
+			throw ApiError.BadRequest('Ошибка при обновлении статуса активации')
 		}
 
 		return updatedUser

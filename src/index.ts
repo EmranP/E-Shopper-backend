@@ -1,11 +1,8 @@
 import dotenv from 'dotenv'
-import express, {
-	type NextFunction,
-	type Request,
-	type Response,
-} from 'express'
+import express from 'express'
 import { checkDB } from './config/db.config'
 import { defaultMiddleware } from './middlewares/appMiddleware.middleware'
+import { errorMiddleware } from './middlewares/error-middleware.middleware'
 import router from './routes/router.routes'
 import logger from './utils/logger.utils'
 
@@ -14,20 +11,14 @@ dotenv.config()
 const app = express()
 const port = process.env.PORT
 
-// Инициализация middleware
+// Инициализация default middlewares
 defaultMiddleware(app, express)
 
 // Routes =================
 app.use('/api', router)
 
-// Глобальный обработчик ошибок
-app.use((err: Error, req: Request, res: Response, next: NextFunction): void => {
-	logger.error(`[ERROR]: ${err.message}`)
-	res.status(500).json({
-		error: 'Internal Server Error',
-		message: err.message,
-	})
-})
+// Custom Middleware
+app.use(errorMiddleware)
 
 // Start Server ===========
 const startApp = async (): Promise<void> => {

@@ -29,11 +29,6 @@ export const activateController = async (
 			return
 		}
 	} catch (error) {
-		if (error instanceof Error) {
-			logger.error(`Ошибка controller activate: ${error.message}`)
-		} else {
-			logger.info('Что-то пошле не так в controller activate')
-		}
-		return
+		next(error)
 	}
 }
