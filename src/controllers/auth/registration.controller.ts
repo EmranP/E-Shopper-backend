@@ -37,14 +37,6 @@ export const registrationController: RequestHandler = async (
 			})
 			.json(userData)
 	} catch (error) {
-		if (error instanceof Error) {
-			logger.error(error.message)
-			res.status(500).json({ message: error.message })
-			return
-		} else {
-			logger.error('Something has been wrong (')
-			res.status(500).json({ message: 'Internal server error' })
-			return
-		}
+		next(error)
 	}
 }

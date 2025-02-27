@@ -16,7 +16,7 @@ class MailService {
 			},
 		})
 	}
-	//? Change url link
+	//? Change url to CLIENT_URL: link
 	async sendActivationMail(to: string, link: string): Promise<void> {
 		try {
 			await this.transporter.sendMail({
