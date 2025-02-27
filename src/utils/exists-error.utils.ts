@@ -11,3 +11,5 @@ export class TokenGenerationError extends Error {
 		this.name = 'TokenGenerationError'
 	}
 }
+
+export class ErrorApi extends Error {}

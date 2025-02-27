@@ -11,7 +11,6 @@ import {
 const routerAuth = Router({ mergeParams: true })
 
 routerAuth.post('/registration', registrationController)
-
 routerAuth.post('/login', loginController)
 routerAuth.post('/logout', logoutController)
 routerAuth.get('/activate/:link', activateController)
