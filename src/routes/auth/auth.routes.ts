@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { body } from 'express-validator'
 import {
 	activateController,
 	getUsersController,
@@ -10,7 +11,13 @@ import {
 
 const routerAuth = Router({ mergeParams: true })
 
-routerAuth.post('/registration', registrationController)
+routerAuth.post(
+	'/registration',
+	body('login').isLength({ min: 3, max: 20 }),
+	body('email').isEmail(),
+	body('password').isLength({ min: 3, max: 32 }),
+	registrationController
+)
 routerAuth.post('/login', loginController)
 routerAuth.post('/logout', logoutController)
 routerAuth.get('/activate/:link', activateController)

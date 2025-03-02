@@ -7,9 +7,11 @@ export interface ITokens {
 	created_at: string
 }
 
+export type TokenReturningType = Pick<ITokens, 'id' | 'refresh_token'> | null
+
 export const getTokenById = async (
 	userId: string | number
-): Promise<Pick<ITokens, 'id' | 'refresh_token'> | null> => {
+): Promise<TokenReturningType> => {
 	const query = `SELECT id, refresh_token FROM tokens WHERE user_id = $1`
 	const request = await pool.query(query, [userId])
 
@@ -30,4 +32,13 @@ export const createToken = async (
 	const request = await pool.query(query, [userId, refreshToken])
 
 	return request.rows[0]
+}
+
+export const removeTokenData = async (
+	refresh_token: string
+): Promise<TokenReturningType> => {
+	const query = `DELETE FROM tokens WHERE refresh_token = $1 RETURNING id, refresh_token`
+	const request = await pool.query(query, [refresh_token])
+
+	return request.rowCount ? request.rows[0] : null
 }

@@ -1,6 +1,11 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { createToken, getTokenById } from '../../models/auth/token.model'
+import {
+	createToken,
+	getTokenById,
+	removeTokenData,
+	type TokenReturningType,
+} from '../../models/auth/token.model'
 import type { IUser } from '../../models/auth/user.model'
 
 export interface IAccessTokenService {
@@ -39,6 +44,11 @@ class TokenService {
 		}
 
 		return await createToken(userId, hashedToken)
+	}
+
+	async removeToken(refreshToken: string): Promise<TokenReturningType> {
+		const tokenData = await removeTokenData(refreshToken)
+		return tokenData
 	}
 }
 

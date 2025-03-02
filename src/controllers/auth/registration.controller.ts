@@ -1,5 +1,7 @@
 import { type RequestHandler } from 'express'
+import { validationResult } from 'express-validator'
 import { userService } from '../../services/auth/user.services'
+import { ApiError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 
 export interface IRequestBodyRegistration {
@@ -12,7 +14,7 @@ export const registrationController: RequestHandler = async (
 	req,
 	res,
 	next
-) => {
+): Promise<void> => {
 	try {
 		const { login, email, password } = req.body as IRequestBodyRegistration
 
@@ -20,6 +22,12 @@ export const registrationController: RequestHandler = async (
 			logger.error(`User is not writing login, email or password`)
 			res.status(400).json({ message: 'All fields are required' })
 			return
+		}
+
+		const errors = validationResult(req)
+
+		if (!errors.isEmpty()) {
+			return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
 		}
 
 		const userData = await userService.registration({
