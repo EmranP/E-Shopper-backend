@@ -1,9 +1,11 @@
+import bcrypt from 'bcrypt'
+import type { QueryResult } from 'pg'
 import { pool } from '../../config/db.config'
 
 export interface ITokens {
 	id: string | number
 	user_id: string | number
-	refresh_token: string | number
+	refresh_token: string
 	created_at: string
 }
 
@@ -37,8 +39,17 @@ export const createToken = async (
 export const removeTokenData = async (
 	refresh_token: string
 ): Promise<TokenReturningType> => {
-	const query = `DELETE FROM tokens WHERE refresh_token = $1 RETURNING id, refresh_token`
-	const request = await pool.query(query, [refresh_token])
+	const query: string = `SELECT id, refresh_token FROM tokens`
+	const result: QueryResult<ITokens> = await pool.query(query)
 
-	return request.rowCount ? request.rows[0] : null
+	for (const row of result.rows) {
+		const isMatch = await bcrypt.compare(refresh_token, row.refresh_token)
+
+		if (isMatch) {
+			await pool.query(`DELETE FROM tokens WHERE user_id = $1`, [row.user_id])
+			return { id: row.id, refresh_token }
+		}
+	}
+
+	return null
 }

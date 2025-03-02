@@ -115,7 +115,7 @@ class UserService {
 		const tokens = await tokenService.removeToken(refreshToken)
 
 		if (!tokens) {
-			throw ApiError.BadRequest('Ошибка при удалений tokena')
+			throw ApiError.BadRequest('Токен не найден или уже удалён')
 		}
 
 		return tokens
