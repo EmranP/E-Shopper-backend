@@ -19,8 +19,7 @@ export interface IUser {
 export const getUserByEmail = async (email: string): Promise<IUser | null> => {
 	try {
 		const query = `
-			SELECT id, name, email, role, created_at, updated_at, is_activated, activation_link 
-	  	FROM users WHERE email = $1 LIMIT 1
+			SELECT * FROM users WHERE email = $1 LIMIT 1
 		`
 		const result: QueryResult<IUser> = await pool.query(query, [email])
 

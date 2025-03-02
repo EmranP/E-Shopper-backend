@@ -1,12 +1,19 @@
-import type { NextFunction, Request, Response } from 'express'
+import type { RequestHandler } from 'express'
+import { userService } from '../../services/auth/user.services'
 
-export const logoutController = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
+export const logoutController: RequestHandler = async (
+	req,
+	res,
+	next
 ): Promise<void> => {
 	try {
-	} catch (error) {
+		const refreshToken: string = req.cookies?.refreshToken
+
+		const token = await userService.logout(refreshToken)
+		res
+			.clearCookie('refreshToken', { httpOnly: true, secure: true })
+			.json(token)
+	} catch (error: unknown) {
 		next(error)
 	}
 }
