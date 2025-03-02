@@ -2,11 +2,11 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import {
 	createToken,
-	getTokenById,
 	removeTokenData,
 	type TokenReturningType,
 } from '../../models/auth/token.model'
 import type { IUser } from '../../models/auth/user.model'
+import { ApiError } from '../../utils/exists-error.utils'
 
 export interface IAccessTokenService {
 	access: string
@@ -36,14 +36,16 @@ class TokenService {
 	}
 
 	async saveToken(userId: number, refreshToken: string) {
-		const tokenData = await getTokenById(userId)
 		const hashedToken = await bcrypt.hash(refreshToken, 10)
+		const token = await createToken(userId, hashedToken)
 
-		if (tokenData) {
-			return await createToken(userId, hashedToken)
+		if (!token) {
+			throw ApiError.BadRequest(
+				'Ошибка при сохранении токена: запись не была создана'
+			)
 		}
 
-		return await createToken(userId, hashedToken)
+		return token
 	}
 
 	async removeToken(refreshToken: string): Promise<TokenReturningType> {
