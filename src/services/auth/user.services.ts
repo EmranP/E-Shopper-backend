@@ -6,6 +6,7 @@ import {
 	getUserByActivateLink,
 	getUserByEmail,
 	getUserById,
+	getUsers,
 	updateUserByIsActivated,
 	type IUser,
 } from '../../models/auth/user.model'
@@ -129,6 +130,7 @@ class UserService {
 		}
 
 		const userData = tokenService.validateRefreshToken(refreshToken) as IUser
+		console.log(userData)
 
 		if (!userData) {
 			logger.warn('Невалидный refresh token')
@@ -163,7 +165,15 @@ class UserService {
 		}
 	}
 
-	async getAllUsers() {}
+	async getAllUsers(): Promise<IUser[]> {
+		const users = await getUsers()
+
+		if (!users) {
+			throw ApiError.BadRequest('Пользователи не были найдены')
+		}
+
+		return users
+	}
 }
 
 export const userService = new UserService()

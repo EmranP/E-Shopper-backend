@@ -25,6 +25,7 @@ export const activateController = async (
 
 		const clientUrl = process.env.CLIENT_URL
 		if (clientUrl) {
+			logger.info('Activate link success sended & redirected user to  page')
 			res.redirect(clientUrl)
 			return
 		}
