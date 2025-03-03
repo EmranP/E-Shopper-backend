@@ -5,6 +5,7 @@ import {
 	createUser,
 	getUserByActivateLink,
 	getUserByEmail,
+	getUserById,
 	updateUserByIsActivated,
 	type IUser,
 } from '../../models/auth/user.model'
@@ -120,6 +121,49 @@ class UserService {
 
 		return tokens
 	}
+
+	async refresh(refreshToken: string) {
+		if (!refreshToken) {
+			logger.warn('Попытка обновления без refresh token')
+			throw ApiError.UnauthorizedError()
+		}
+
+		const userData = tokenService.validateRefreshToken(refreshToken) as IUser
+
+		if (!userData) {
+			logger.warn('Невалидный refresh token')
+			throw ApiError.UnauthorizedError()
+		}
+
+		const tokenFromDb = await tokenService.findToken(refreshToken)
+
+		if (!tokenFromDb) {
+			logger.warn('Refresh token отсутствует в базе (возможно, удалён)')
+			throw ApiError.UnauthorizedError()
+		}
+
+		const user = await getUserById(userData.id)
+
+		if (!user) {
+			logger.error(`Пользователь с id ${userData.id} не найден`)
+			throw ApiError.BadRequest('Пользователь не найден')
+		}
+
+		const userDTO = new UserDTO(user)
+		const tokens = await tokenService.generateToken({ ...userDTO })
+
+		if (!tokens.refresh) {
+			throw new TokenGenerationError()
+		}
+
+		await tokenService.saveToken(userDTO.id, tokens.refresh)
+		return {
+			...tokens,
+			user: userDTO,
+		}
+	}
+
+	async getAllUsers() {}
 }
 
 export const userService = new UserService()

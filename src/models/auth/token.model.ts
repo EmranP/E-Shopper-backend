@@ -11,11 +11,11 @@ export interface ITokens {
 
 export type TokenReturningType = Pick<ITokens, 'id' | 'refresh_token'> | null
 
-export const getTokenById = async (
-	userId: string | number
+export const getTokenByRefreshToken = async (
+	refreshToken: string
 ): Promise<TokenReturningType> => {
-	const query = `SELECT id, refresh_token FROM tokens WHERE user_id = $1`
-	const request = await pool.query(query, [userId])
+	const query = `SELECT id, refresh_token FROM tokens WHERE refresh_token = $1`
+	const request = await pool.query(query, [refreshToken])
 
 	return request.rows.length > 0 ? request.rows[0] : null
 }
