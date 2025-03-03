@@ -14,10 +14,17 @@ export type TokenReturningType = Pick<ITokens, 'id' | 'refresh_token'> | null
 export const getTokenByRefreshToken = async (
 	refreshToken: string
 ): Promise<TokenReturningType> => {
-	const query = `SELECT id, refresh_token FROM tokens WHERE refresh_token = $1`
-	const request = await pool.query(query, [refreshToken])
+	const query = `SELECT id, refresh_token FROM tokens`
+	const result: QueryResult<ITokens> = await pool.query(query)
 
-	return request.rows.length > 0 ? request.rows[0] : null
+	for (const row of result.rows) {
+		const isMatch = await bcrypt.compare(refreshToken, row.refresh_token)
+		if (isMatch) {
+			return { id: row.id, refresh_token: row.refresh_token }
+		}
+	}
+
+	return null
 }
 
 export const createToken = async (

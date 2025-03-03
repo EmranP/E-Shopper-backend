@@ -8,14 +8,7 @@ export const refreshController: RequestHandler = async (
 	next
 ): Promise<void> => {
 	try {
-		const refreshToken: string | undefined = req.cookies?.refreshToken
-
-		if (!refreshToken) {
-			logger.warn('Попытка обновления без refresh token')
-			res.status(400).json({ message: 'Токен отсутствует' })
-			return
-		}
-
+		const refreshToken: string = req.cookies?.refreshToken
 		const userData = await userService.refresh(refreshToken)
 
 		if (!userData) {

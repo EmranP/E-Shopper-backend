@@ -1,5 +1,6 @@
 import type { QueryResult } from 'pg'
 import { pool } from '../../config/db.config'
+import type { ROLES } from '../../constants/roles'
 import { ApiError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 
@@ -9,7 +10,7 @@ export interface IUser {
 	name: string
 	email: string
 	password?: string
-	role: number | string
+	role: ROLES
 	created_at: Date | string
 	updated_at: Date | string
 	is_activated: boolean
@@ -24,7 +25,7 @@ export const getUserById = async (
 		const query = `SELECT * FROM users WHERE id = $1`
 		const result: QueryResult<IUser> = await pool.query(query, [userId])
 
-		return result.rows.length > 0 ? result.rows[0] : null
+		return result.rows[0] || null
 	} catch (error) {
 		logger.error('Ошибка при поиске пользователя по id:', error)
 		throw ApiError.BadRequest('Database error: unable to get user by id')
@@ -37,7 +38,7 @@ export const getUserByEmail = async (email: string): Promise<IUser | null> => {
 		`
 		const result: QueryResult<IUser> = await pool.query(query, [email])
 
-		return result.rows.length > 0 ? result.rows[0] : null
+		return result.rows[0] || null
 	} catch (error) {
 		logger.error('Ошибка при поиске пользователя по email:', error)
 		throw new Error('Database error: unable to get user by email')
@@ -61,6 +62,18 @@ export const getUserByActivateLink = async (
 	} catch (error) {
 		logger.error('Ошибка при поиске пользователя по activation-link:', error)
 		throw new Error('Database error: unable to get user by activation-link')
+	}
+}
+
+export const getUsers = async (): Promise<IUser[] | null> => {
+	try {
+		const query = `SELECT * FROM users`
+		const result: QueryResult<IUser> = await pool.query(query)
+
+		return result.rows || null
+	} catch (error) {
+		logger.error('Ошибка при поиске users:', error)
+		throw ApiError.BadRequest('Database error: unable to get users')
 	}
 }
 // POST
@@ -104,7 +117,7 @@ export const updateUserByIsActivated = async (
 			activationLink,
 		])
 
-		if (resultQuery.rowCount === 0) {
+		if (!resultQuery.rowCount) {
 			logger.warn(
 				'Не удалось активировать пользователя: ссылка "${activationLink}" не найдена'
 			)

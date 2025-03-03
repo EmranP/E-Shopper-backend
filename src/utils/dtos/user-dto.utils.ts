@@ -1,10 +1,11 @@
+import type { ROLES } from '../../constants/roles'
 import type { IUser } from '../../models/auth/user.model'
 
 export class UserDTO {
 	email: string
 	id: number
 	isActivated: boolean
-	role: number | string
+	role: ROLES
 
 	constructor(model: IUser) {
 		this.email = model.email
