@@ -22,7 +22,7 @@ export const getUserById = async (
 	userId: string | number
 ): Promise<IUser | null> => {
 	try {
-		const query = `SELECT * FROM users WHERE id = $1`
+		const query: string = `SELECT * FROM users WHERE id = $1`
 		const result: QueryResult<IUser> = await pool.query(query, [userId])
 
 		return result.rows[0] || null
@@ -33,7 +33,7 @@ export const getUserById = async (
 }
 export const getUserByEmail = async (email: string): Promise<IUser | null> => {
 	try {
-		const query = `
+		const query: string = `
 			SELECT * FROM users WHERE email = $1 LIMIT 1
 		`
 		const result: QueryResult<IUser> = await pool.query(query, [email])
@@ -41,14 +41,14 @@ export const getUserByEmail = async (email: string): Promise<IUser | null> => {
 		return result.rows[0] || null
 	} catch (error) {
 		logger.error('Ошибка при поиске пользователя по email:', error)
-		throw new Error('Database error: unable to get user by email')
+		throw ApiError.BadRequest('Database error: unable to get user by email')
 	}
 }
 export const getUserByActivateLink = async (
 	activationLink: string
 ): Promise<IUser | null> => {
 	try {
-		const query = `SELECT id, name, email, role, created_at, updated_at, is_activated, activation_link FROM users WHERE activation_link = $1`
+		const query: string = `SELECT id, name, email, role, created_at, updated_at, is_activated, activation_link FROM users WHERE activation_link = $1`
 		const resultQuery: QueryResult<IUser> = await pool.query(query, [
 			activationLink,
 		])
@@ -61,13 +61,14 @@ export const getUserByActivateLink = async (
 		return resultQuery.rows[0]
 	} catch (error) {
 		logger.error('Ошибка при поиске пользователя по activation-link:', error)
-		throw new Error('Database error: unable to get user by activation-link')
+		throw ApiError.BadRequest(
+			'Database error: unable to get user by activation-link'
+		)
 	}
 }
-
 export const getUsers = async (): Promise<IUser[] | null> => {
 	try {
-		const query = `SELECT * FROM users`
+		const query: string = `SELECT * FROM users`
 		const result: QueryResult<IUser> = await pool.query(query)
 
 		return result.rows || null
@@ -84,7 +85,7 @@ export const createUser = async (
 	activationLink: string
 ): Promise<IUser> => {
 	try {
-		const query = `
+		const query: string = `
 		INSERT INTO users (name, email, password, activation_link)
 		VALUES ($1, $2, $3, $4)
 		RETURNING id, name, email, role, created_at, updated_at, is_activated, activation_link`
@@ -97,7 +98,7 @@ export const createUser = async (
 		return result.rows[0]
 	} catch (error) {
 		logger.error('Ошибка при создании пользователя:', error)
-		throw new Error('Database error: unable to create user')
+		throw ApiError.BadRequest('Database error: unable to create user')
 	}
 }
 // PATCH
@@ -106,7 +107,7 @@ export const updateUserByIsActivated = async (
 	isActivated: boolean
 ): Promise<IUser | null> => {
 	try {
-		const query = `
+		const query: string = `
 				UPDATE users 
 				SET is_activated = $1 
 				WHERE activation_link = $2
@@ -130,7 +131,7 @@ export const updateUserByIsActivated = async (
 			`Ошибка при обновлении пользователя с activation_link "${activationLink}":`,
 			error
 		)
-		throw new Error(
+		throw ApiError.BadRequest(
 			'Database error: Не удалось обновить статус активации пользователя'
 		)
 	}
