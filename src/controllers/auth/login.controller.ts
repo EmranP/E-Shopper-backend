@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express'
-import { userService } from '../../services/auth/user.services'
+import { userAuthService } from '../../services/auth/user-auth.services'
 import logger from '../../utils/logger.utils'
 
 export interface IRequestBodyLogin {
@@ -21,7 +21,7 @@ export const loginController: RequestHandler = async (
 			return
 		}
 
-		const userAuthData = await userService.login({ email, password })
+		const userAuthData = await userAuthService.login({ email, password })
 
 		logger.info('User success has been login')
 

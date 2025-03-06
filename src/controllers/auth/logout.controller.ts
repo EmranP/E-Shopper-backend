@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express'
-import { userService } from '../../services/auth/user.services'
+import { userAuthService } from '../../services/auth/user-auth.services'
 import logger from '../../utils/logger.utils'
 
 export const logoutController: RequestHandler = async (
@@ -15,7 +15,7 @@ export const logoutController: RequestHandler = async (
 			return
 		}
 
-		const token = await userService.logout(refreshToken)
+		const token = await userAuthService.logout(refreshToken)
 
 		if (!token) {
 			res.status(400).json({ message: 'Токен не найден' })

@@ -1,5 +1,6 @@
 import type { QueryResult } from 'pg'
 import { pool } from '../../config/db.config'
+import { dbTableProducts } from '../../constants/db-table-name'
 import { ApiError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 
@@ -20,17 +21,36 @@ export const getAllProducts = async (): Promise<
 	IResponseProductAPI[] | null
 > => {
 	try {
-		const sqlQuery: string = `SELECT * FROM products`
+		const sqlQuery: string = `SELECT * FROM ${dbTableProducts}`
 		const sqlRequest: QueryResult<IResponseProductAPI> = await pool.query(
 			sqlQuery
 		)
 
 		return sqlRequest.rows || null
 	} catch (error) {
-		logger.error('Ошибка при получении всех products:', error)
-		throw ApiError.BadRequest('Database error: unable to get products')
+		logger.error(`Ошибка при получении всех ${dbTableProducts}:`, error)
+		throw ApiError.BadRequest(
+			`Database error: unable to get ${dbTableProducts}`
+		)
 	}
 }
+export const getItemProduct = async (
+	productId: string | number
+): Promise<Partial<IResponseProductAPI> | null> => {
+	try {
+		const sqlQuery: string = `SELECT * FROM ${dbTableProducts} WHERE id = $1 LIMIT 1`
+		const sqlRequest: QueryResult<Partial<IResponseProductAPI>> =
+			await pool.query(sqlQuery, [productId])
+
+		return sqlRequest.rows[0] || null
+	} catch (error) {
+		logger.error(`Ошибка при поиске ${dbTableProducts} по id:`, error)
+		throw ApiError.BadRequest(
+			`Database error: unable to get ${dbTableProducts} by id`
+		)
+	}
+}
+// GET SEARCH
 export const searchProducts = async (
 	search: string,
 	limit: number,
@@ -40,7 +60,7 @@ export const searchProducts = async (
 		const sqlQuery: string = `
 		SELECT *, 
       ts_rank(search_vector, to_tsquery('russian', $1) || to_tsquery('english', $1)) AS rank
-    FROM product
+    FROM ${dbTableProducts}
       WHERE search_vector @@ (to_tsquery('russian', $1) || to_tsquery('english', $1))
     ORDER BY rank DESC
     LIMIT $2 OFFSET $3`
@@ -53,27 +73,14 @@ export const searchProducts = async (
 
 		return sqlRequest.rows || null
 	} catch (error) {
-		logger.error('Ошибка при поиске product:', error)
-		throw ApiError.BadRequest('Database error: unable to get product by search')
+		logger.error(`Ошибка при поиске ${dbTableProducts}:`, error)
+		throw ApiError.BadRequest(
+			`Database error: unable to get ${dbTableProducts} by search`
+		)
 	}
 }
-export const getItemProduct = async (
-	productId: string | number
-): Promise<Partial<IResponseProductAPI> | null> => {
-	try {
-		const sqlQuery: string = `SELECT * FROM products WHERE id = $1 LIMIT 1`
-		const sqlRequest: QueryResult<Partial<IResponseProductAPI>> =
-			await pool.query(sqlQuery, [productId])
-
-		return sqlRequest.rows[0] || null
-	} catch (error) {
-		logger.error('Ошибка при поиске product по id:', error)
-		throw ApiError.BadRequest('Database error: unable to get product by id')
-	}
-}
-
 // POST
-export const createProduct = async (
+export const createdProduct = async (
 	name: string,
 	description: string,
 	image_url: string,
@@ -93,19 +100,76 @@ export const createProduct = async (
 			user_id,
 		]
 
-		const sqlQuery: string = `INSERT INTO products 
-		(name, description, image_url, price, stock, category_id) 
+		const sqlQuery: string = `INSERT INTO ${dbTableProducts} 
+		(name, description, image_url, price, stock, category_id, user_id) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7) 
-		RETURNING id, name,	description, price, stock, category_id, user_id, create_at, image_url;`
+		RETURNING id, name,	description, price, stock, category_id, user_id, created_at, image_url;`
 		const sqlRequest: QueryResult<Partial<IResponseProductAPI>> =
 			await pool.query(sqlQuery, values)
 
 		return sqlRequest.rows[0]
 	} catch (error) {
-		logger.error('Ошибка при создании product:', error)
-		throw ApiError.BadRequest('Database error: unable to create product')
+		logger.error(`Ошибка при создании ${dbTableProducts}:`, error)
+		throw ApiError.BadRequest(
+			`Database error: unable to create ${dbTableProducts}`
+		)
 	}
 }
 // PATCH
+export const updatedProduct = async (
+	name: string,
+	description: string,
+	image_url: string,
+	user_id: number,
+	category_id: number,
+	price: number,
+	stock: number
+): Promise<Partial<IResponseProductAPI> | null> => {
+	try {
+		const values: [string, string, string, number, number, number, number] = [
+			name,
+			description,
+			image_url,
+			price,
+			stock,
+			category_id,
+			user_id,
+		]
 
+		const sqlQuery: string = `
+			UPDATE ${dbTableProducts} 
+			SET name = $1,
+					description = $2,
+					image_url = $3,
+					price = $5,
+					stock = $6
+					category_id = $4,
+			WHERE id = $7
+		`
+		const sqlRequest: QueryResult<IResponseProductAPI> = await pool.query(
+			sqlQuery,
+			values
+		)
+
+		return sqlRequest.rows[0] || null
+	} catch (error) {
+		logger.error(`Ошибка при updated ${dbTableProducts}:`, error)
+		throw ApiError.BadRequest(
+			`Database error: unable to updated ${dbTableProducts}`
+		)
+	}
+}
 // DELETE
+export const deleteProduct = async (
+	productId: number | string
+): Promise<void> => {
+	try {
+		const sqlQuery: string = `DELETE FROM ${dbTableProducts} WHERE id = $1`
+		await pool.query(sqlQuery, [productId])
+	} catch (error) {
+		logger.error(`Ошибка при delete ${dbTableProducts}:`, error)
+		throw ApiError.BadRequest(
+			`Database error: unable to delete ${dbTableProducts}`
+		)
+	}
+}

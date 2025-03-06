@@ -1,12 +1,12 @@
 import bcrypt from 'bcrypt'
 import jwt, { type JwtPayload } from 'jsonwebtoken'
+import type { IUser } from '../../models/auth/auth-user.model'
 import {
 	createToken,
 	getTokenByRefreshToken,
 	removeTokenData,
 	type TokenReturningType,
 } from '../../models/auth/token.model'
-import type { IUser } from '../../models/auth/user.model'
 import { ApiError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 

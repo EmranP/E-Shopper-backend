@@ -1,39 +1,38 @@
 import bcrypt from 'bcrypt'
 import { v4 as uuidV4 } from 'uuid'
-import type { TokenReturningType } from '../../models/auth/token.model'
 import {
 	createUser,
 	getUserByActivateLink,
 	getUserByEmail,
 	getUserById,
-	getUsers,
 	updateUserByIsActivated,
 	type IUser,
-} from '../../models/auth/user.model'
+} from '../../models/auth/auth-user.model'
+import type { TokenReturningType } from '../../models/auth/token.model'
 import { UserDTO } from '../../utils/dtos/user-dto.utils'
 import { ApiError, TokenGenerationError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 import { mailService } from './mail.services'
 import { tokenService, type IAccessTokenService } from './token.services'
 
-export interface IUserServiceProps {
+export interface IUserAuthServiceProps {
 	login: string
 	email: string
 	password: string
 }
 
-export interface IUserService extends IAccessTokenService {
+export interface IUserAuthService extends IAccessTokenService {
 	user: UserDTO
 }
 
-class UserService {
+class UserAuthService {
 	constructor(private readonly loggerError = logger) {}
 
 	async registration({
 		login,
 		email,
 		password,
-	}: IUserServiceProps): Promise<IUserService> {
+	}: IUserAuthServiceProps): Promise<IUserAuthService> {
 		const candidate = await getUserByEmail(email)
 		const errorMessage = `Пользователь с почтой ${email} уже существует`
 
@@ -85,7 +84,7 @@ class UserService {
 	async login({
 		email,
 		password,
-	}: Partial<IUserServiceProps>): Promise<IUserService> {
+	}: Partial<IUserAuthServiceProps>): Promise<IUserAuthService> {
 		const user = await getUserByEmail(email as string)
 
 		if (!user) {
@@ -164,16 +163,6 @@ class UserService {
 			user: userDTO,
 		}
 	}
-
-	async getAllUsers(): Promise<IUser[]> {
-		const users = await getUsers()
-
-		if (!users) {
-			throw ApiError.BadRequest('Пользователи не были найдены')
-		}
-
-		return users
-	}
 }
 
-export const userService = new UserService()
+export const userAuthService = new UserAuthService()

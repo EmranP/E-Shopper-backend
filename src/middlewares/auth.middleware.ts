@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express'
-import type { IUser } from '../models/auth/user.model'
+import type { IUser } from '../models/auth/auth-user.model'
 import { tokenService } from '../services/auth/token.services'
 import { ApiError } from '../utils/exists-error.utils'
 
