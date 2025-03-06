@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express'
-import { userService } from '../../services/auth/user.services'
+import { userAuthService } from '../../services/auth/user-auth.services'
 import logger from '../../utils/logger.utils'
 
 export const refreshController: RequestHandler = async (
@@ -9,7 +9,7 @@ export const refreshController: RequestHandler = async (
 ): Promise<void> => {
 	try {
 		const refreshToken: string = req.cookies?.refreshToken
-		const userData = await userService.refresh(refreshToken)
+		const userData = await userAuthService.refresh(refreshToken)
 
 		if (!userData) {
 			logger.warn(`Ошибка при обновлении токена: refreshToken не найден в БД`)

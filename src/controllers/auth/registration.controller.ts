@@ -1,6 +1,6 @@
 import { type RequestHandler } from 'express'
 import { validationResult } from 'express-validator'
-import { userService } from '../../services/auth/user.services'
+import { userAuthService } from '../../services/auth/user-auth.services'
 import { ApiError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 
@@ -30,7 +30,7 @@ export const registrationController: RequestHandler = async (
 			return next(ApiError.BadRequest('Ошибка при валидации', errors.array()))
 		}
 
-		const userData = await userService.registration({
+		const userData = await userAuthService.registration({
 			login,
 			email,
 			password,

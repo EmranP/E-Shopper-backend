@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
-import { userService } from '../../services/auth/user.services'
+import { userAuthService } from '../../services/auth/user-auth.services'
 import logger from '../../utils/logger.utils'
 
 interface IRequestParamsLink extends Request {
@@ -21,7 +21,7 @@ export const activateController = async (
 			return
 		}
 
-		await userService.activate(link)
+		await userAuthService.activate(link)
 
 		const clientUrl = process.env.CLIENT_URL
 		if (clientUrl) {

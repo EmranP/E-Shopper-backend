@@ -1,0 +1,7 @@
+export const dbTableCategories: string = 'categories'
+export const dbTableOrderItems: string = 'order_items'
+export const dbTableOrders: string = 'orders'
+export const dbTableProducts: string = 'products'
+export const dbTableReviews: string = 'reviews'
+export const dbTableTokens: string = 'tokens'
+export const dbTableUsers: string = 'users'

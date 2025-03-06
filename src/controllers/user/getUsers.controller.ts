@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
-import { userService } from '../../services/auth/user.services'
+import { userServices } from '../../services/user/user.services'
 import logger from '../../utils/logger.utils'
 
 export const getUsersController = async (
@@ -8,7 +8,7 @@ export const getUsersController = async (
 	next: NextFunction
 ): Promise<void> => {
 	try {
-		const users = await userService.getAllUsers()
+		const users = await userServices.getAllUsers()
 
 		if (!users) {
 			res.status(404).json({ message: 'Пользователь не были найдены' })
