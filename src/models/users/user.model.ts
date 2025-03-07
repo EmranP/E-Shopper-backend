@@ -18,6 +18,21 @@ export const getModelUsers = async (): Promise<IUser[] | null> => {
 		throw ApiError.BadRequest('Database error: unable to get users')
 	}
 }
+export const getModelUserById = async (
+	userId: string | number
+): Promise<IUser | null> => {
+	try {
+		const query: string = `SELECT * FROM ${dbTableUsers} WHERE id = $1`
+		const result: QueryResult<IUser> = await pool.query(query, [userId])
+
+		return result.rows[0] || null
+	} catch (error) {
+		logger.error('Ошибка при поиске пользователя по id:', error)
+		throw ApiError.BadRequest(
+			`Database error: unable to get ${dbTableUsers} by id`
+		)
+	}
+}
 // Patch
 export const updatedModelUser = async (
 	roleId: ROLES,
@@ -44,15 +59,18 @@ export const updatedModelUser = async (
 // Delete
 export const deleteModelUser = async (
 	userId: string | number
-): Promise<void> => {
+): Promise<IUser | null> => {
 	try {
-		const sqlQuery: string = `DELETE FROM ${dbTableUsers} WHERE id = $1`
+		const sqlQuery: string = `
+			DELETE FROM ${dbTableUsers} WHERE id = $1
+			RETURNING id, name, email, role, created_at, updated_at
+		`
 
-		await pool.query(sqlQuery, [userId])
+		const sqlRequest: QueryResult<IUser> = await pool.query(sqlQuery, [userId])
+
+		return sqlRequest.rows[0] || null
 	} catch (error) {
-		logger.error(`Ошибка при delete ${dbTableUsers}:`, error)
-		throw ApiError.BadRequest(
-			`Database error: unable to delete ${dbTableUsers}`
-		)
+		logger.error(`Database error while deleting user ${userId}:`, error)
+		throw ApiError.BadRequest('Database error: unable to delete user')
 	}
 }

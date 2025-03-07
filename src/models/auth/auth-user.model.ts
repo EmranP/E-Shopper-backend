@@ -19,21 +19,6 @@ export interface IUser {
 }
 
 // GET
-export const getUserById = async (
-	userId: string | number
-): Promise<IUser | null> => {
-	try {
-		const query: string = `SELECT * FROM ${dbTableUsers} WHERE id = $1`
-		const result: QueryResult<IUser> = await pool.query(query, [userId])
-
-		return result.rows[0] || null
-	} catch (error) {
-		logger.error('Ошибка при поиске пользователя по id:', error)
-		throw ApiError.BadRequest(
-			`Database error: unable to get ${dbTableUsers} by id`
-		)
-	}
-}
 export const getUserByEmail = async (email: string): Promise<IUser | null> => {
 	try {
 		const query: string = `

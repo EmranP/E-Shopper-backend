@@ -4,11 +4,11 @@ import {
 	createUser,
 	getUserByActivateLink,
 	getUserByEmail,
-	getUserById,
 	updateUserByIsActivated,
 	type IUser,
 } from '../../models/auth/auth-user.model'
 import type { TokenReturningType } from '../../models/auth/token.model'
+import { getModelUserById } from '../../models/users/user.model'
 import { UserDTO } from '../../utils/dtos/user-dto.utils'
 import { ApiError, TokenGenerationError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
@@ -143,7 +143,7 @@ class UserAuthService {
 			throw ApiError.UnauthorizedError()
 		}
 
-		const user = await getUserById(userData.id)
+		const user = await getModelUserById(userData.id)
 
 		if (!user) {
 			logger.error(`Пользователь с id ${userData.id} не найден`)
