@@ -10,9 +10,9 @@ import type { IUser } from '../auth/auth-user.model'
 export const getModelUsers = async (): Promise<IUser[] | null> => {
 	try {
 		const sqlQuery: string = `SELECT * FROM ${dbTableUsers}`
-		const sqlRequest: QueryResult<IUser> = await pool.query(sqlQuery)
+		const sqlResult: QueryResult<IUser> = await pool.query(sqlQuery)
 
-		return sqlRequest.rows || null
+		return sqlResult.rows || null
 	} catch (error) {
 		logger.error('Ошибка при поиске users:', error)
 		throw ApiError.BadRequest('Database error: unable to get users')
@@ -45,12 +45,12 @@ export const updatedModelUser = async (
 			WHERE id = $2
 			RETURNING id, name, email, role, created_at, updated_at
 		`
-		const sqlRequest: QueryResult<IUser> = await pool.query(sqlQuery, [
+		const sqlResult: QueryResult<IUser> = await pool.query(sqlQuery, [
 			roleId,
 			userId,
 		])
 
-		return sqlRequest.rows[0] || null
+		return sqlResult.rows[0] || null
 	} catch (error) {
 		logger.error('Ошибка при updated user-role:', error)
 		throw ApiError.BadRequest('Database error: unable to updated user-role')
@@ -66,9 +66,9 @@ export const deleteModelUser = async (
 			RETURNING id, name, email, role, created_at, updated_at
 		`
 
-		const sqlRequest: QueryResult<IUser> = await pool.query(sqlQuery, [userId])
+		const sqlResult: QueryResult<IUser> = await pool.query(sqlQuery, [userId])
 
-		return sqlRequest.rows[0] || null
+		return sqlResult.rows[0] || null
 	} catch (error) {
 		logger.error(`Database error while deleting user ${userId}:`, error)
 		throw ApiError.BadRequest('Database error: unable to delete user')
