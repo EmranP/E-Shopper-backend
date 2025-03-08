@@ -22,11 +22,11 @@ export const getAllProducts = async (): Promise<
 > => {
 	try {
 		const sqlQuery: string = `SELECT * FROM ${dbTableProducts}`
-		const sqlRequest: QueryResult<IResponseProductAPI> = await pool.query(
+		const sqlResult: QueryResult<IResponseProductAPI> = await pool.query(
 			sqlQuery
 		)
 
-		return sqlRequest.rows || null
+		return sqlResult.rows || null
 	} catch (error) {
 		logger.error(`Ошибка при получении всех ${dbTableProducts}:`, error)
 		throw ApiError.BadRequest(
@@ -39,10 +39,10 @@ export const getItemProduct = async (
 ): Promise<Partial<IResponseProductAPI> | null> => {
 	try {
 		const sqlQuery: string = `SELECT * FROM ${dbTableProducts} WHERE id = $1 LIMIT 1`
-		const sqlRequest: QueryResult<Partial<IResponseProductAPI>> =
+		const sqlResult: QueryResult<Partial<IResponseProductAPI>> =
 			await pool.query(sqlQuery, [productId])
 
-		return sqlRequest.rows[0] || null
+		return sqlResult.rows[0] || null
 	} catch (error) {
 		logger.error(`Ошибка при поиске ${dbTableProducts} по id:`, error)
 		throw ApiError.BadRequest(
@@ -66,12 +66,12 @@ export const searchProducts = async (
     LIMIT $2 OFFSET $3`
 
 		const values = [`${search}`, Number(limit), offset]
-		const sqlRequest: QueryResult<IResponseProductAPI> = await pool.query(
+		const sqlResult: QueryResult<IResponseProductAPI> = await pool.query(
 			sqlQuery,
 			values
 		)
 
-		return sqlRequest.rows || null
+		return sqlResult.rows || null
 	} catch (error) {
 		logger.error(`Ошибка при поиске ${dbTableProducts}:`, error)
 		throw ApiError.BadRequest(
@@ -104,10 +104,10 @@ export const createdProduct = async (
 		(name, description, image_url, price, stock, category_id, user_id) 
 		VALUES ($1, $2, $3, $4, $5, $6, $7) 
 		RETURNING id, name,	description, price, stock, category_id, user_id, created_at, image_url;`
-		const sqlRequest: QueryResult<Partial<IResponseProductAPI>> =
+		const sqlResult: QueryResult<Partial<IResponseProductAPI>> =
 			await pool.query(sqlQuery, values)
 
-		return sqlRequest.rows[0]
+		return sqlResult.rows[0]
 	} catch (error) {
 		logger.error(`Ошибка при создании ${dbTableProducts}:`, error)
 		throw ApiError.BadRequest(
@@ -146,12 +146,12 @@ export const updatedProduct = async (
 					category_id = $4,
 			WHERE id = $7
 		`
-		const sqlRequest: QueryResult<IResponseProductAPI> = await pool.query(
+		const sqlResult: QueryResult<IResponseProductAPI> = await pool.query(
 			sqlQuery,
 			values
 		)
 
-		return sqlRequest.rows[0] || null
+		return sqlResult.rows[0] || null
 	} catch (error) {
 		logger.error(`Ошибка при updated ${dbTableProducts}:`, error)
 		throw ApiError.BadRequest(

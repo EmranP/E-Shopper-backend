@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt'
 import type { QueryResult } from 'pg'
 import { pool } from '../../config/db.config'
+import { dbTableTokens } from '../../constants/db-table-name'
 
 export interface ITokens {
 	id: string | number
@@ -14,7 +15,7 @@ export type TokenReturningType = Pick<ITokens, 'id' | 'refresh_token'> | null
 export const getTokenByRefreshToken = async (
 	refreshToken: string
 ): Promise<TokenReturningType> => {
-	const query = `SELECT id, refresh_token FROM tokens`
+	const query = `SELECT id, refresh_token FROM ${dbTableTokens}`
 	const result: QueryResult<ITokens> = await pool.query(query)
 
 	for (const row of result.rows) {
@@ -32,7 +33,7 @@ export const createToken = async (
 	refreshToken: string
 ): Promise<ITokens> => {
 	const query = `
-		INSERT INTO tokens (user_id, refresh_token)
+		INSERT INTO ${dbTableTokens} (user_id, refresh_token)
 		VALUES ($1, $2)
 		ON CONFLICT (user_id)
 		DO UPDATE SET refresh_token = EXCLUDED.refresh_token
@@ -46,7 +47,7 @@ export const createToken = async (
 export const removeTokenData = async (
 	refresh_token: string
 ): Promise<TokenReturningType> => {
-	const query: string = `SELECT id, refresh_token FROM tokens`
+	const query: string = `SELECT id, refresh_token FROM ${dbTableTokens}`
 	const result: QueryResult<ITokens> = await pool.query(query)
 
 	for (const row of result.rows) {

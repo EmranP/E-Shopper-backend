@@ -10,8 +10,6 @@ import { UserDTO } from '../../utils/dtos/user-dto.utils'
 import { ApiError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 
-// !Todo: Make Controller for user  remove
-
 export interface IUserService {
 	user: UserDTO
 }
