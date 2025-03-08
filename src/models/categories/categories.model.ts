@@ -58,10 +58,17 @@ export const addModelCategory = async (
 	categoryName: string
 ): Promise<ICategories> => {
 	try {
+		const checkExistsQuery: string = `SELECT * FROM ${dbTableCategories} WHERE name = $1`
+		const checkExistsResult: QueryResult<ICategories> = await pool.query(
+			checkExistsQuery,
+			[categoryName]
+		)
+		if ((checkExistsResult.rowCount ?? 0) > 0) {
+			logAndThrow('Категория уже существует')
+		}
+
 		const sqlQuery: string = `
-			INSERT INTO ${dbTableCategories} 
-			VALUES ($1)
-			RETURNING *;
+			INSERT INTO ${dbTableCategories} (name) VALUES ($1) RETURNING *
 		`
 		const sqlResult: QueryResult<ICategories> = await pool.query(sqlQuery, [
 			categoryName,
@@ -116,13 +123,12 @@ export const updateModelCategories = async (
 export const deleteModelCategories = async (
 	categoryId: string | number
 ): Promise<{ message: string }> => {
-	const client = await pool.connect()
 	try {
-		await client.query('BEGIN') // Начинаем транзакцию
+		await pool.query('BEGIN') // Начинаем транзакцию
 
 		// Проверяем существование категории перед удалением
 		const checkQuery = `SELECT * FROM ${dbTableCategories} WHERE id = $1`
-		const checkResult = await client.query(checkQuery, [categoryId])
+		const checkResult = await pool.query(checkQuery, [categoryId])
 
 		if (checkResult.rowCount === 0) {
 			return logAndThrowNotFound(
@@ -131,18 +137,16 @@ export const deleteModelCategories = async (
 		}
 
 		const sqlQuery = `DELETE FROM ${dbTableCategories} WHERE id = $1`
-		await client.query(sqlQuery, [categoryId])
-		await client.query('COMMIT') // Подтверждаем транзакцию
+		await pool.query(sqlQuery, [categoryId])
+		await pool.query('COMMIT') // Подтверждаем транзакцию
 
 		logger.info(`Категория id=${categoryId} успешно удалена из model`)
 		return { message: `Категория id=${categoryId} успешно удалена` }
 	} catch (error) {
-		await client.query('ROLLBACK')
+		await pool.query('ROLLBACK')
 		return logAndThrow(
 			`Ошибка при удалении категории id=${categoryId} из model`,
 			error
 		)
-	} finally {
-		client.release()
 	}
 }
