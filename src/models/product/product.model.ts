@@ -34,7 +34,7 @@ export const getAllProducts = async (): Promise<
 		)
 	}
 }
-export const getItemProduct = async (
+export const getProductById = async (
 	productId: string | number
 ): Promise<Partial<IResponseProductAPI> | null> => {
 	try {
