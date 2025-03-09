@@ -19,7 +19,9 @@ export const addProduct: RequestHandler = async (req, res, next) => {
 
 		const newProduct = await productService.addedProduct(productData)
 
-		logger.info(`Продукт успешно добавлена из controller: ${productData}`)
+		logger.info(
+			`Продукт успешно добавлена из controller: ${{ ...productData }}`
+		)
 		res.status(201).json(newProduct)
 	} catch (error) {
 		next(error)

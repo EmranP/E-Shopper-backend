@@ -1,8 +1,10 @@
 import type { QueryResult } from 'pg'
 import { pool } from '../../config/db.config'
 import { dbTableProducts } from '../../constants/db-table-name'
+import { ROLES } from '../../constants/roles'
 import {
 	logAndThrow,
+	logAndThrowForbidden,
 	logAndThrowNotFound,
 } from '../../utils/log-and-throw.utils'
 import logger from '../../utils/logger.utils'
@@ -17,7 +19,7 @@ export interface IResponseProductAPI {
 	created_at: Date | string
 	updated_at: Date | string
 	image_url: string
-	user_id: string
+	user_id: string | number
 	search_vector: string
 }
 // GET
@@ -83,6 +85,7 @@ export const searchModelProducts = async (
 		LIMIT $2 OFFSET $3;`
 
 		const values = [search, limit, offset]
+		console.log(values)
 		const sqlResult: QueryResult<IResponseProductAPI> = await pool.query(
 			sqlQuery,
 			values
@@ -145,7 +148,7 @@ export const updatedModelProduct = async (
 
 		const sqlQuery = `
 		UPDATE ${dbTableProducts} 
-		SET name = $1, description = $2, image_url = $3, price = $4, stock = $5, category_id = $6, updated_at = NOW()
+		SET name = $1, description = $2, image_url = $3, price = $4, stock = $5, category_id = $6
 		WHERE id = $7
 		RETURNING *;`
 		const values = [name, description, image_url, price, stock, category_id, id]
@@ -166,17 +169,30 @@ export const updatedModelProduct = async (
 }
 // DELETE
 export const deleteModelProduct = async (
-	productId: number | string
+	productId: number | string,
+	userId: number | string,
+	userRole: ROLES | undefined
 ): Promise<{ message: string }> => {
 	try {
 		await pool.query('BEGIN')
 
 		const checkQuery: string = `SELECT * FROM ${dbTableProducts} WHERE id = $1`
-		const checkResult = await pool.query(checkQuery, [productId])
+		const checkResult: QueryResult<IResponseProductAPI> = await pool.query(
+			checkQuery,
+			[productId]
+		)
 
 		if (checkResult.rowCount === 0) {
 			return logAndThrowNotFound(
 				`Продукт с id=${productId} не найдена из model`
+			)
+		}
+
+		const product = checkResult.rows[0]
+
+		if (product.user_id !== userId && userRole !== ROLES.ADMIN) {
+			return logAndThrowForbidden(
+				`Удаление запрещено: у вас нет прав удалить продукт с ID ${productId}.`
 			)
 		}
 

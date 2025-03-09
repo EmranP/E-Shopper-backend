@@ -7,6 +7,8 @@ export const updateProduct: RequestHandler = async (req, res, next) => {
 	try {
 		const { productId } = req.params
 		const updatedProductData: TRequestBodyPostProduct = req.body
+		const userId = req.user?.id
+		const userRole = req.user?.role
 
 		if (!productId) {
 			res
@@ -17,7 +19,9 @@ export const updateProduct: RequestHandler = async (req, res, next) => {
 
 		const updatedProduct = await productService.updateProduct(
 			productId,
-			updatedProductData
+			updatedProductData,
+			userId,
+			userRole
 		)
 
 		logger.info(`Продукт с id=${productId} успешно обновлена из controller`)

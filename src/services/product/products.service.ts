@@ -1,3 +1,4 @@
+import { ROLES } from '../../constants/roles'
 import {
 	createdModelProduct,
 	deleteModelProduct,
@@ -7,8 +8,10 @@ import {
 	updatedModelProduct,
 	type IResponseProductAPI,
 } from '../../models/product/product.model'
+import { ApiError } from '../../utils/exists-error.utils'
 import {
 	logAndThrow,
+	logAndThrowForbidden,
 	logAndThrowNotFound,
 } from '../../utils/log-and-throw.utils'
 import logger from '../../utils/logger.utils'
@@ -72,8 +75,16 @@ class ProductService {
 
 	async updateProduct(
 		id: number | string,
-		product: Partial<IResponseProductAPI>
+		product: Partial<IResponseProductAPI>,
+		userId: number | undefined,
+		userRole: ROLES | undefined
 	): Promise<Partial<IResponseProductAPI>> {
+		if (product.user_id !== userId && userRole !== ROLES.ADMIN) {
+			return logAndThrowForbidden(
+				`Обновление запрещено: у вас нет прав обновлять продукт с ID ${id}.`
+			)
+		}
+
 		const updatedProduct = await updatedModelProduct(id, product)
 
 		if (!updatedProduct) {
@@ -84,8 +95,16 @@ class ProductService {
 		return updatedProduct
 	}
 
-	async removeProduct(id: string | number) {
-		const removedProduct = await deleteModelProduct(id)
+	async removeProduct(
+		id: string | number,
+		userId: number | undefined,
+		userRole: ROLES | undefined
+	): Promise<{ message: string }> {
+		if (!userId || !userRole) {
+			throw ApiError.UnauthorizedError()
+		}
+
+		const removedProduct = await deleteModelProduct(id, userId, userRole)
 
 		if (!removedProduct) {
 			return logAndThrowNotFound(

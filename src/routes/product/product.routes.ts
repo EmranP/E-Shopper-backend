@@ -11,29 +11,30 @@ import {
 import { authenticated } from '../../middlewares/auth.middleware'
 import { hasRole } from '../../middlewares/hasRole.middleware'
 
-// !Todo: Fixed Search, Add file for show logger result and Testing other controller post, patch, remove
+// !Todo: Make Orders && Order_items
+
 const routerProducts = Router({ mergeParams: true })
 // Get Products
 routerProducts.get('/', getProducts)
-routerProducts.get('/:productId', getProductItem)
 routerProducts.get('/search', searchProductsController)
+routerProducts.get('/:productId', getProductItem)
 // Add Product
 routerProducts.post(
-	'/',
+	'/add',
 	authenticated,
 	hasRole([ROLES.ADMIN, ROLES.CUSTOMER]),
 	addProduct
 )
 // Updated Product
 routerProducts.patch(
-	'/:productId',
+	'/edit/:productId',
 	authenticated,
 	hasRole([ROLES.ADMIN, ROLES.CUSTOMER]),
 	updateProduct
 )
 // Remove Product
 routerProducts.delete(
-	'/:productId',
+	'/remove/:productId',
 	authenticated,
 	hasRole([ROLES.ADMIN, ROLES.CUSTOMER]),
 	removeProduct
