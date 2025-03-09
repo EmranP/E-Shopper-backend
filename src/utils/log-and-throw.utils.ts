@@ -15,3 +15,12 @@ export const logAndThrowNotFound = (
 	logger.error(`${message}: ${error instanceof Error ? error.message : error}`)
 	throw ApiError.NotFound(message)
 }
+
+// !Helper function for logging and throwing not Forbidden errors
+export const logAndThrowForbidden = (
+	message: string,
+	error?: unknown
+): never => {
+	logger.error(`${message}: ${error instanceof Error ? error.message : error}`)
+	throw ApiError.Forbidden(message)
+}
