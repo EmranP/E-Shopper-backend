@@ -6,18 +6,18 @@ import {
 	updateModelCategories,
 	type ICategories,
 } from '../../models/categories/categories.model'
-import { ApiError } from '../../utils/exists-error.utils'
+import {
+	logAndThrow,
+	logAndThrowNotFound,
+} from '../../utils/log-and-throw.utils'
 import logger from '../../utils/logger.utils'
-
-// !Todo: Should make Controller for categories
 
 class CategoriesServices {
 	async getCategories(): Promise<ICategories[]> {
 		const categoriesData = await getModelAllCategories()
 
 		if (!categoriesData.length) {
-			logger.warn('Категории не найдены из services')
-			throw ApiError.NotFound('Категории не найдены из services')
+			return logAndThrowNotFound('Категории не найдены из services')
 		}
 
 		logger.info('Категории успешно получены из services')
@@ -28,8 +28,7 @@ class CategoriesServices {
 		const categoryData = await getModelCategoriesById(categoryId)
 
 		if (!categoryData) {
-			logger.warn(`Категория с id=${categoryId} не найдена из services`)
-			throw ApiError.NotFound(
+			return logAndThrowNotFound(
 				`Категория с id=${categoryId} не найдена из services`
 			)
 		}
@@ -42,8 +41,7 @@ class CategoriesServices {
 		const newCategory = await addModelCategory(categoryName)
 
 		if (!newCategory) {
-			logger.error('Ошибка при добавлении категории из services')
-			throw ApiError.BadRequest('Ошибка при добавлении категории из services')
+			logAndThrow('Ошибка при добавлении категории из services')
 		}
 
 		logger.info(`Категория '${categoryName}' успешно добавлена из services`)
@@ -57,12 +55,7 @@ class CategoriesServices {
 		const updateCategory = await updateModelCategories(categoryId, categoryName)
 
 		if (!updateCategory) {
-			logger.warn(
-				`Категория с id=${categoryId} не найдена для обновления из services`
-			)
-			throw ApiError.NotFound(
-				`Категория с id=${categoryId} не найдена из services`
-			)
+			logAndThrowNotFound(`Категория с id=${categoryId} не найдена из services`)
 		}
 
 		logger.info(`Категория с id=${categoryId} успешно обновлена из services`)
@@ -75,10 +68,7 @@ class CategoriesServices {
 		const removeCategory = await deleteModelCategories(categoryId)
 
 		if (!removeCategory) {
-			logger.warn(`Ошибка при удалении категории id=${categoryId} из services`)
-			throw ApiError.BadRequest(
-				`Ошибка при удалении категории id=${categoryId} из services`
-			)
+			logAndThrow(`Ошибка при удалении категории id=${categoryId} из services`)
 		}
 
 		logger.info(`Категория с id=${categoryId} успешно удалена из services`)
