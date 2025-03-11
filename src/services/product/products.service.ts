@@ -8,6 +8,10 @@ import {
 	updatedModelProduct,
 	type IResponseProductAPI,
 } from '../../models/product/product.model'
+import {
+	ProductsDTO,
+	type IProductDTO,
+} from '../../utils/dtos/product-dto.utils'
 import { ApiError } from '../../utils/exists-error.utils'
 import {
 	logAndThrow,
@@ -17,20 +21,23 @@ import {
 import logger from '../../utils/logger.utils'
 
 class ProductService {
-	async getProducts(): Promise<IResponseProductAPI[]> {
+	async getProducts(): Promise<IProductDTO[]> {
 		const productsData = await getAllModelProducts()
 
 		if (!productsData?.length) {
 			return logAndThrowNotFound('Продукты не найдены из services')
 		}
 
+		const productDTOs = productsData.map(product => new ProductsDTO(product))
+		const plainProducts = productDTOs.map(dto => dto.toPlain())
+
 		logger.info('Продукты успешно получены из services')
-		return productsData
+		return plainProducts
 	}
 
 	async getProductById(
 		productId: string | number
-	): Promise<Partial<IResponseProductAPI>> {
+	): Promise<Partial<IProductDTO>> {
 		const productItem = await getModelProductById(productId)
 
 		if (!productItem) {
@@ -39,15 +46,17 @@ class ProductService {
 			)
 		}
 
+		const productItemDTO = new ProductsDTO(productItem).toPlain()
+
 		logger.info(`Продукт с id=${productId} успешно найдена из services`)
-		return productItem
+		return productItemDTO
 	}
 
 	async searchProducts(
 		search: string,
 		limit: number,
 		offset: number
-	): Promise<IResponseProductAPI[]> {
+	): Promise<IProductDTO[]> {
 		const searchProducts = await searchModelProducts(search, limit, offset)
 
 		if (!searchProducts?.length) {
@@ -56,21 +65,28 @@ class ProductService {
 			)
 		}
 
+		const searchProductDTOs = searchProducts.map(
+			product => new ProductsDTO(product)
+		)
+		const searchPlainProducts = searchProductDTOs.map(dto => dto.toPlain())
+
 		logger.info(`Продукты по запросу "${search}" успешно найдены из services`)
-		return searchProducts
+		return searchPlainProducts
 	}
 
 	async addedProduct(
 		product: Partial<IResponseProductAPI>
-	): Promise<IResponseProductAPI> {
+	): Promise<IProductDTO> {
 		const newProduct = await createdModelProduct(product)
 
 		if (!newProduct) {
 			return logAndThrow('Ошибка при добавлении Продукт из services')
 		}
 
+		const newProductDTO = new ProductsDTO(newProduct).toPlain()
+
 		logger.info(`Продукт успешно добавлена из services: ${product}`)
-		return newProduct
+		return newProductDTO
 	}
 
 	async updateProduct(
@@ -91,8 +107,10 @@ class ProductService {
 			return logAndThrowNotFound(`Продукт с id=${id} не найдена из services`)
 		}
 
+		const updatedProductDTO = new ProductsDTO(updatedProduct).toPlain()
+
 		logger.info(`Продукт с id=${id} успешно обновлена из services`)
-		return updatedProduct
+		return updatedProductDTO
 	}
 
 	async removeProduct(

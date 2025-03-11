@@ -11,8 +11,6 @@ import {
 import { authenticated } from '../../middlewares/auth.middleware'
 import { hasRole } from '../../middlewares/hasRole.middleware'
 
-// !Todo: Make Orders && Order_items
-
 const routerProducts = Router({ mergeParams: true })
 // Get Products
 routerProducts.get('/', getProducts)
