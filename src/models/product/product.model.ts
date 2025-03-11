@@ -142,7 +142,7 @@ export const createdModelProduct = async (
 export const updatedModelProduct = async (
 	id: number | string,
 	product: Partial<IResponseProductAPI>
-): Promise<Partial<IResponseProductAPI>> => {
+): Promise<IResponseProductAPI> => {
 	try {
 		const { name, description, image_url, price, stock, category_id } = product
 
