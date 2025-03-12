@@ -5,3 +5,5 @@ export const dbTableProducts: string = 'products'
 export const dbTableReviews: string = 'reviews'
 export const dbTableTokens: string = 'tokens'
 export const dbTableUsers: string = 'users'
+export const dbTableCarts: string = `carts`
+export const dbTableCartItems: string = `cart_items`
