@@ -7,8 +7,6 @@ import { removeCartController } from '../../controllers/cart/carts/removedCarts.
 import { authenticated } from '../../middlewares/auth.middleware'
 import { hasRole } from '../../middlewares/hasRole.middleware'
 
-// !Todo: Make Orders, Order_items, Cart_item from db and Make logger file for show result logger
-
 const routerCarts = Router({ mergeParams: true })
 
 routerCarts.get(
