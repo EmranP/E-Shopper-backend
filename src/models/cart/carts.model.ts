@@ -64,6 +64,17 @@ export const getModelCartById = async (
 // POST
 export const addModelCart = async (userId: number): Promise<ICarts> => {
 	try {
+		const existingCartQuery: string = `SELECT * FROM ${dbTableCarts} WHERE user_id = $1;`
+		const existingCartResult: QueryResult<ICarts> = await pool.query(
+			existingCartQuery,
+			[userId]
+		)
+
+		if (existingCartResult.rowCount && existingCartResult.rowCount > 0) {
+			logger.warn(`Пользователь с ID ${userId} уже имеет корзину.`)
+			return existingCartResult.rows[0]
+		}
+
 		const sqlQuery: string = `INSERT INTO ${dbTableCarts} (user_id) VALUES($1) RETURNING *;`
 		const sqlResult: QueryResult<ICarts> = await pool.query(sqlQuery, [userId])
 
