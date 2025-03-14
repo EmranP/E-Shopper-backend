@@ -79,7 +79,7 @@ export const addModelCartItems = async (
 export const editModelCartItems = async (
 	id: number | string,
 	cartItemData: Partial<ICartItems>
-): Promise<Partial<ICartItems>> => {
+): Promise<ICartItems> => {
 	try {
 		const { quantity, price } = cartItemData
 
