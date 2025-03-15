@@ -173,8 +173,10 @@ export const deleteModelProduct = async (
 	userId: number | string,
 	userRole: ROLES | undefined
 ): Promise<{ message: string }> => {
+	const client = await pool.connect()
+
 	try {
-		await pool.query('BEGIN')
+		await client.query('BEGIN')
 
 		const checkQuery: string = `SELECT * FROM ${dbTableProducts} WHERE id = $1`
 		const checkResult: QueryResult<IResponseProductAPI> = await pool.query(
@@ -198,12 +200,14 @@ export const deleteModelProduct = async (
 
 		const sqlQuery = `DELETE FROM ${dbTableProducts} WHERE id = $1`
 		await pool.query(sqlQuery, [productId])
-		await pool.query('COMMIT')
+		await client.query('COMMIT')
 
 		logger.info(`Продукт с ID ${productId} успешно удалён.`)
 		return { message: `Продукт id=${productId} успешно удалена из model` }
 	} catch (error) {
-		await pool.query('ROLLBACK')
+		await client.query('ROLLBACK')
 		return logAndThrow(`Ошибка при удалении продукта с ID ${productId}.`, error)
+	} finally {
+		client.release()
 	}
 }
