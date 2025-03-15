@@ -6,8 +6,6 @@ import routerCategories from './categories/categories.routes'
 import routerProducts from './product/product.routes'
 import routerUser from './user/user.routes'
 
-// !Todo: Make Orders, Order_items, Cart_item
-
 const router = Router({ mergeParams: true })
 
 router.use('/auth', routerAuth)

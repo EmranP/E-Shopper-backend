@@ -176,3 +176,6 @@ dist
 
 # Docker
 .dockerignore
+
+# todo
+todo.txt

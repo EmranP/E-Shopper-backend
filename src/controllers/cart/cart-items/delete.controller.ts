@@ -7,8 +7,8 @@ export const removeCartItemsController: RequestHandler = async (
 	next
 ): Promise<void> => {
 	try {
-		const { id } = req.params
-		const removeCartItems = await cartItemsService.removeCartItems(id)
+		const { cartId } = req.params
+		const removeCartItems = await cartItemsService.removeCartItems(cartId)
 
 		res.status(201).json(removeCartItems)
 	} catch (error) {

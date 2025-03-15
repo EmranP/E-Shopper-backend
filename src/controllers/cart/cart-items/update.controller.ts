@@ -8,10 +8,10 @@ export const editCartItemsController: RequestHandler = async (
 	next
 ): Promise<void> => {
 	try {
-		const { id } = req.params
+		const { cartId } = req.params
 		const cartItemsData = req.body as TRequestBodyICartItems
 		const editCartItems = await cartItemsService.editCartItems(
-			id,
+			cartId,
 			cartItemsData
 		)
 
