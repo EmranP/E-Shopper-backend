@@ -11,13 +11,12 @@ export type TRequestBodyPostProduct = Omit<
 export const addProduct: RequestHandler = async (req, res, next) => {
 	try {
 		const productData: TRequestBodyPostProduct = req.body
+		const userId = req.user?.id
 
-		if (!productData) {
-			res.status(400).send({ message: 'Ошибка при добвалений нового product' })
-			return
-		}
-
-		const newProduct = await productService.addedProduct(productData)
+		const newProduct = await productService.addedProduct(
+			userId as number,
+			productData
+		)
 
 		logger.info(
 			`Продукт успешно добавлена из controller: ${{ ...productData }}`

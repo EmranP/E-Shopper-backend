@@ -75,9 +75,16 @@ class ProductService {
 	}
 
 	async addedProduct(
+		userId: number,
 		product: Partial<IResponseProductAPI>
 	): Promise<IProductDTO> {
-		const newProduct = await createdModelProduct(product)
+		if (!product || !userId) {
+			return logAndThrow(
+				'Ошибка при добавлении Продукт: данный не были указоны'
+			)
+		}
+
+		const newProduct = await createdModelProduct(userId, product)
 
 		if (!newProduct) {
 			return logAndThrow('Ошибка при добавлении Продукт из services')
@@ -118,7 +125,7 @@ class ProductService {
 		userId: number | undefined,
 		userRole: ROLES | undefined
 	): Promise<{ message: string }> {
-		if (!userId || !userRole) {
+		if (!userId || (userRole === undefined && userRole === null)) {
 			throw ApiError.UnauthorizedError()
 		}
 

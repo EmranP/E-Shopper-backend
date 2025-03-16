@@ -43,7 +43,7 @@ export const updatedModelUser = async (
 			UPDATE ${dbTableUsers}
 			SET role = $1
 			WHERE id = $2
-			RETURNING id, name, email, role, created_at, updated_at
+			RETURNING id, name, email, role, created_at, updated_at;
 		`
 		const sqlResult: QueryResult<IUser> = await pool.query(sqlQuery, [
 			roleId,

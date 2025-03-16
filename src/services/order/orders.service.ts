@@ -21,6 +21,8 @@ class OrdersService {
 	async getOrdersForAdmin(userRole: ROLES): Promise<IOrdersDTO[]> {
 		if (userRole !== ROLES.ADMIN) {
 			return logAndThrowForbidden('Нет прав для получения заказов.')
+		} else if (userRole === undefined || null) {
+			throw ApiError.UnauthorizedError()
 		}
 
 		const orders = await getModelOrdersForAdmin()
@@ -50,7 +52,7 @@ class OrdersService {
 		const order = await getModelOrdersById(orderId)
 
 		if (!order) {
-			return logAndThrow('Заказ не найден.')
+			return logAndThrowNotFound('Заказ не найден.')
 		}
 
 		logger.info(`Получен заказ с ID ${orderId}.`)
@@ -79,7 +81,7 @@ class OrdersService {
 		status: string
 	): Promise<IOrdersDTO> {
 		if (userRole !== ROLES.ADMIN) {
-			return logAndThrowForbidden(`'Нет праыв для обновления заказов.'`)
+			return logAndThrowForbidden(`У вас нет права  обновлять этот заказ. :(`)
 		}
 
 		if (!orderId || !status)

@@ -13,7 +13,7 @@ export const updatedUserController: RequestHandler = async (
 		const { userId } = req.params
 		const { role } = req.body as { role: ROLES }
 
-		if (!userId || !role) {
+		if (!userId || role === undefined || null) {
 			logger.error('User ID и Role обязательны')
 			throw ApiError.BadRequest('User ID и Role обязательны')
 		}
