@@ -69,7 +69,7 @@ export const getModelOrdersById = async (
 		logger.info(`Получение заказа с id=${orderId}`)
 		return sqlResult.rows[0]
 	} catch (error) {
-		return logAndThrow('Error id orders', error)
+		return logAndThrow(`Ошибка при получений orders по ID ${orderId}`, error)
 	}
 }
 
