@@ -10,8 +10,8 @@ import type { IDeleteResponse } from '../cart/carts.model'
 
 export interface IOrders {
 	id: number
-	user_id: number | string
-	total_price: number | string
+	user_id: number
+	total_price: number
 	status: string
 	created_at: Date | string
 	updated_at: Date | string

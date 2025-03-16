@@ -118,8 +118,10 @@ export const editModelCartItems = async (
 export const deleteModelCartItems = async (
 	id: number | string
 ): Promise<IDeleteResponse> => {
+	const client = await pool.connect()
+
 	try {
-		await pool.query('BEGIN')
+		await client.query('BEGIN')
 
 		const checkQuery: string = `SELECT * FROM ${dbTableCartItems} WHERE id = $1`
 		const checkResult: QueryResult<ICartItems> = await pool.query(checkQuery, [
@@ -132,12 +134,14 @@ export const deleteModelCartItems = async (
 
 		const sqlQuery: string = `DELETE FROM ${dbTableCartItems} WHERE id = $1`
 		await pool.query(sqlQuery, [id])
-		await pool.query('COMMIT')
+		await client.query('COMMIT')
 
 		logger.info(`Cart-item с ID ${id} успешно удалён.`)
 		return { message: `Cart-item с ID ${id} успешно удалён из model.` }
 	} catch (error) {
-		await pool.query('ROLLBACK')
+		await client.query('ROLLBACK')
 		return logAndThrow(`Ошибка при удалении продукта с ID ${id}.`, error)
+	} finally {
+		client.release()
 	}
 }

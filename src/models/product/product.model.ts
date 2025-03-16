@@ -18,8 +18,8 @@ export interface IResponseProductAPI {
 	category_id: number
 	created_at: Date | string
 	updated_at: Date | string
+	user_id?: number | string
 	image_url: string
-	user_id: string | number
 	search_vector: string
 }
 // GET
@@ -107,11 +107,11 @@ export const searchModelProducts = async (
 }
 // POST
 export const createdModelProduct = async (
+	userId: number,
 	product: Partial<IResponseProductAPI>
 ): Promise<IResponseProductAPI> => {
 	try {
-		const { name, description, image_url, price, stock, category_id, user_id } =
-			product
+		const { name, description, image_url, price, stock, category_id } = product
 
 		const sqlQuery: string = `INSERT INTO ${dbTableProducts} 
 		(name, description, image_url, price, stock, category_id, user_id) 
@@ -125,7 +125,7 @@ export const createdModelProduct = async (
 			price,
 			stock,
 			category_id,
-			user_id,
+			userId,
 		]
 		const sqlResult: QueryResult<IResponseProductAPI> = await pool.query(
 			sqlQuery,
@@ -140,10 +140,25 @@ export const createdModelProduct = async (
 }
 // PATCH
 export const updatedModelProduct = async (
-	id: number | string,
+	productId: number | string,
 	product: Partial<IResponseProductAPI>
 ): Promise<IResponseProductAPI> => {
+	const client = await pool.connect()
 	try {
+		await client.query('BEGIN')
+
+		const checkQuery: string = `SELECT * FROM ${dbTableProducts} WHERE id = $1`
+		const checkResult: QueryResult<IResponseProductAPI> = await pool.query(
+			checkQuery,
+			[productId]
+		)
+
+		if (checkResult.rowCount === 0) {
+			return logAndThrowNotFound(
+				`Продукт с id=${productId} не найдена из model`
+			)
+		}
+
 		const { name, description, image_url, price, stock, category_id } = product
 
 		const sqlQuery = `
@@ -151,20 +166,31 @@ export const updatedModelProduct = async (
 		SET name = $1, description = $2, image_url = $3, price = $4, stock = $5, category_id = $6
 		WHERE id = $7
 		RETURNING *;`
-		const values = [name, description, image_url, price, stock, category_id, id]
+		const values = [
+			name,
+			description,
+			image_url,
+			price,
+			stock,
+			category_id,
+			productId,
+		]
 		const sqlResult: QueryResult<IResponseProductAPI> = await pool.query(
 			sqlQuery,
 			values
 		)
+		await client.query('COMMIT')
 
-		if (sqlResult.rowCount === 0) {
-			return logAndThrowNotFound(`Продукт с ID ${id} не найден для обновления.`)
-		}
-
-		logger.info(`Продукт с ID ${id} успешно обновлён.`)
+		logger.info(`Продукт с ID ${productId} успешно обновлён.`)
 		return sqlResult.rows[0]
 	} catch (error) {
-		return logAndThrow(`Ошибка при обновлении продукта с ID ${id}.`, error)
+		await client.query('ROLLBACK')
+		return logAndThrow(
+			`Ошибка при обновлении продукта с ID ${productId}.`,
+			error
+		)
+	} finally {
+		client.release()
 	}
 }
 // DELETE
@@ -173,8 +199,10 @@ export const deleteModelProduct = async (
 	userId: number | string,
 	userRole: ROLES | undefined
 ): Promise<{ message: string }> => {
+	const client = await pool.connect()
+
 	try {
-		await pool.query('BEGIN')
+		await client.query('BEGIN')
 
 		const checkQuery: string = `SELECT * FROM ${dbTableProducts} WHERE id = $1`
 		const checkResult: QueryResult<IResponseProductAPI> = await pool.query(
@@ -198,12 +226,14 @@ export const deleteModelProduct = async (
 
 		const sqlQuery = `DELETE FROM ${dbTableProducts} WHERE id = $1`
 		await pool.query(sqlQuery, [productId])
-		await pool.query('COMMIT')
+		await client.query('COMMIT')
 
 		logger.info(`Продукт с ID ${productId} успешно удалён.`)
 		return { message: `Продукт id=${productId} успешно удалена из model` }
 	} catch (error) {
-		await pool.query('ROLLBACK')
+		await client.query('ROLLBACK')
 		return logAndThrow(`Ошибка при удалении продукта с ID ${productId}.`, error)
+	} finally {
+		client.release()
 	}
 }
