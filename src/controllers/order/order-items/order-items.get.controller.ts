@@ -17,7 +17,7 @@ export const getOrderItemsForAdminController: RequestHandler = async (
 			userRole as ROLES
 		)
 
-		logger.info('Order-items success get for admin')
+		logger.info('Успешно получены позиции заказа для администратора')
 		res.status(200).json(orderItemsAdmin)
 	} catch (error) {
 		next(error)
@@ -34,7 +34,7 @@ export const getOrderItemsController: RequestHandler = async (
 
 		const orderItems = await orderItemsService.getAllOrderItems(orderId)
 
-		logger.info('Order-items customer success got')
+		logger.info('Успешно получены позиции заказа для пользователя')
 		res.status(200).json(orderItems)
 	} catch (error) {
 		next(error)
@@ -51,7 +51,7 @@ export const getOrderItemsByIdController: RequestHandler = async (
 
 		const orderItem = await orderItemsService.getOrderItemsById(orderId, itemId)
 
-		logger.info('Order item by id success got form controller')
+		logger.info('Успешно получена позиция заказа по ID')
 		res.status(200).json(orderItem)
 	} catch (error) {
 		next(error)

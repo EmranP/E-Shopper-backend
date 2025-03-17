@@ -15,7 +15,7 @@ export const addOrderItemsController: RequestHandler = async (
 			orderItemData
 		)
 
-		logger.info('Success created order-items form controller')
+		logger.info('Успешно созданы новые позиции заказа')
 		res.status(201).json(newOrderItems)
 	} catch (error) {
 		next(error)

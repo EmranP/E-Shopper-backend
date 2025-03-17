@@ -19,7 +19,7 @@ export const removeOrderItemsForAdminController: RequestHandler = async (
 			itemId
 		)
 
-		logger.info(`Success remove order-items ${itemId}`)
+		logger.info(`Успешно удалены позиции заказа ${itemId}`)
 		res.status(201).json(removeOrderItems)
 	} catch (error) {
 		next(error)

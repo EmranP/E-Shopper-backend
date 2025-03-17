@@ -22,7 +22,7 @@ export const editOrderItemsForAdminController: RequestHandler = async (
 			orderItemData
 		)
 
-		logger.info('Success edited order-items')
+		logger.info('Успешно обновлены позиции заказа')
 		res.status(201).json(editOrderItem)
 	} catch (error) {
 		next(error)
