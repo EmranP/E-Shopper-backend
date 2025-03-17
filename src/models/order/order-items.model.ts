@@ -1,4 +1,3 @@
-import type { QueryResult } from 'pg'
 import { pool } from '../../config/db.config'
 import { dbTableOrderItems } from '../../constants/db-table-name'
 import {
@@ -22,16 +21,21 @@ export interface IOrderItems {
 export const getModelOrderItemsForAdmin = async (): Promise<IOrderItems[]> => {
 	try {
 		const sqlQuery: string = `SELECT * FROM ${dbTableOrderItems}`
-		const sqlResult: QueryResult<IOrderItems> = await pool.query(sqlQuery)
+		const sqlResult = await pool.query<IOrderItems>(sqlQuery)
 
 		if (sqlResult.rowCount === 0) {
-			return logAndThrowNotFound('Заказы товаров для admin не найдены')
+			return logAndThrowNotFound(
+				'Заказы товаров для администратора не найдены.'
+			)
 		}
 
-		logger.info('Получениеы заказы товаров для admin')
+		logger.info('Успешное получение всех заказов товаров для администратора.')
 		return sqlResult.rows
 	} catch (error) {
-		return logAndThrow('Ошибка при получении заказ товаров для admin', error)
+		return logAndThrow(
+			'Не удалось получить все заказы товаров для администратора.',
+			error
+		)
 	}
 }
 export const getModelOrderItems = async (
@@ -39,18 +43,23 @@ export const getModelOrderItems = async (
 ): Promise<IOrderItems[]> => {
 	try {
 		const sqlQuery: string = `SELECT * FROM ${dbTableOrderItems} WHERE order_id = $1`
-		const sqlResult: QueryResult<IOrderItems> = await pool.query(sqlQuery, [
-			orderId,
-		])
+		const sqlResult = await pool.query<IOrderItems>(sqlQuery, [orderId])
 
 		if (sqlResult.rowCount === 0) {
-			return logAndThrowNotFound('Заказы товаров для customers не найдены')
+			return logAndThrowNotFound(
+				`Заказы товаров для заказа с ID ${orderId} не найдены.`
+			)
 		}
 
-		logger.info('Получениеы заказы товаров для admin')
+		logger.info(
+			`Успешное получение заказов товаров для заказа с ID: ${orderId}.`
+		)
 		return sqlResult.rows
 	} catch (error) {
-		return logAndThrow('')
+		return logAndThrow(
+			`Не удалось получить заказы товаров для заказа с ID: ${orderId}.`,
+			error
+		)
 	}
 }
 export const getModelOrderItemsById = async (
@@ -59,19 +68,23 @@ export const getModelOrderItemsById = async (
 ): Promise<IOrderItems> => {
 	try {
 		const sqlQuery: string = `SELECT * FROM ${dbTableOrderItems} WHERE id = $1 AND order_id = $2`
-		const sqlResult: QueryResult<IOrderItems> = await pool.query(sqlQuery, [
-			itemId,
-			orderId,
-		])
+		const sqlResult = await pool.query<IOrderItems>(sqlQuery, [itemId, orderId])
 
 		if (sqlResult.rowCount === 0) {
-			return logAndThrowNotFound('Order items not found')
+			return logAndThrowNotFound(
+				`Заказ товара с ID ${itemId} для заказа с ID ${orderId} не найден.`
+			)
 		}
 
-		logger.info('Success get order items')
+		logger.info(
+			`Успешное получение заказа товара с ID: ${itemId} для заказа с ID: ${orderId}.`
+		)
 		return sqlResult.rows[0]
 	} catch (error) {
-		return logAndThrow(`Ошибка при получений orders по ID ${orderId}`, error)
+		return logAndThrow(
+			`Не удалось получить заказ товара с ID: ${itemId} для заказа с ID: ${orderId}.`,
+			error
+		)
 	}
 }
 // POST
@@ -87,15 +100,12 @@ export const createModelOrderItems = async (
 		RETURNING *;
 		`
 		const values = [order_id, product_id, quantity, price]
-		const sqlResult: QueryResult<IOrderItems> = await pool.query(
-			sqlQuery,
-			values
-		)
+		const sqlResult = await pool.query<IOrderItems>(sqlQuery, values)
 
-		logger.info(`Order-items success added to orders ${order_id}`)
+		logger.info(`Успешно добавлен заказ товара для заказа с ID: ${order_id}.`)
 		return sqlResult.rows[0]
 	} catch (error) {
-		return logAndThrow('Error create order-items')
+		return logAndThrow('Не удалось создать заказ товара.', error)
 	}
 }
 // PATCH
@@ -113,52 +123,48 @@ export const editModelOrderItems = async (
 		RETURNING *;
 		`
 		const values = [order_id, product_id, quantity, price, itemId]
-		const sqlResult: QueryResult<IOrderItems> = await pool.query(
-			sqlQuery,
-			values
-		)
+		const sqlResult = await pool.query<IOrderItems>(sqlQuery, values)
 
 		if (sqlResult.rowCount === 0) {
 			return logAndThrowNotFound(
-				`Order-items с ID ${itemId} не найден для обновления.`
+				`Заказ товара с ID ${itemId} не найден для обновления.`
 			)
 		}
 
-		logger.info('Success updated order-items')
+		logger.info(`Успешное обновление заказа товара с ID: ${itemId}.`)
 		return sqlResult.rows[0]
 	} catch (error) {
-		return logAndThrow('Erorr handler')
+		return logAndThrow('Не удалось обновить заказ товара.', error)
 	}
 }
 // DELETE
 export const deleteModelOrderItems = async (
-	itemId: number
+	itemId: number | string
 ): Promise<IDeleteResponse> => {
 	const client = await pool.connect()
 
 	try {
 		await client.query('BEGIN')
 
-		const checkQuery: string = `SELECT * FROM ${dbTableOrderItems} WHERE id = $1`
-		const checkResult: QueryResult<IOrderItems> = await pool.query(checkQuery, [
-			itemId,
-		])
+		const checkQuery = `SELECT * FROM ${dbTableOrderItems} WHERE id = $1`
+		const checkResult = await pool.query<IOrderItems>(checkQuery, [itemId])
 
 		if (checkResult.rowCount === 0) {
-			return logAndThrowNotFound(
-				`Order-items с id=${itemId} не найдена из model`
-			)
+			return logAndThrowNotFound(`Заказ товара с ID ${itemId} не найден.`)
 		}
 
-		const sqlQuery: string = `DELETE FROM ${dbTableOrderItems} WHERE id = $1`
+		const sqlQuery = `DELETE FROM ${dbTableOrderItems} WHERE id = $1`
 		await pool.query(sqlQuery, [itemId])
 		await client.query('COMMIT')
 
-		logger.info(`Order-item с ID ${itemId} успешно удалён.`)
-		return { message: `Order-item с ID ${itemId} успешно удалён.` }
+		logger.info(`Успешное удаление заказа товара с ID: ${itemId}.`)
+		return { message: `Успешное удаление заказа товара с ID: ${itemId}.` }
 	} catch (error) {
 		await client.query('ROLLBACK')
-		return logAndThrow(`Ошибка при удалении orderItems с ID ${itemId}.`, error)
+		return logAndThrow(
+			`Не удалось удалить заказ товара с ID: ${itemId}.`,
+			error
+		)
 	} finally {
 		client.release()
 	}

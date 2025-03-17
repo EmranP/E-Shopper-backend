@@ -3,7 +3,7 @@ import routerAuth from './auth/auth.routes'
 import routerCartItems from './cart/cart-items.routes'
 import routerCarts from './cart/carts.routes'
 import routerCategories from './categories/categories.routes'
-import routerOrders from './order/orders/orders.route'
+import routerOrders from './order/orders.route'
 import routerProducts from './product/product.routes'
 import routerUser from './user/user.routes'
 
