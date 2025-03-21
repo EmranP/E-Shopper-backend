@@ -58,7 +58,7 @@ class UserAuthService {
 		}
 
 		await tokenService.saveToken(userDTO.id, tokens.refresh)
-
+		console.log(userDTO)
 		return {
 			...tokens,
 			user: userDTO,

@@ -6,7 +6,6 @@ import { ApiError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 
 export interface IUser {
-	login: string
 	id: number
 	name: string
 	email: string
