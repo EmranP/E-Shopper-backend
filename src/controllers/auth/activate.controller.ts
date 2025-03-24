@@ -22,13 +22,11 @@ export const activateController = async (
 		}
 
 		await userAuthService.activate(link)
-
 		const clientUrl = process.env.CLIENT_URL
-		if (clientUrl) {
-			logger.info('Activate link success sended & redirected user to  page')
-			res.redirect(clientUrl)
-			return
-		}
+		if (!clientUrl) return
+
+		logger.info('Activate link success sended & redirected user to  page')
+		res.redirect(clientUrl)
 	} catch (error) {
 		next(error)
 	}
