@@ -42,7 +42,7 @@ export const getAllModelProducts = async (): Promise<IResponseProductAPI[]> => {
 		}
 
 		logger.info(
-			`Успешное получение всех продуктов (${sqlResult.rowCount} записей)`
+			`Успешное получение всех продуктов ${sqlResult.rowCount} записей)`
 		)
 		return sqlResult.rows
 	} catch (error) {
