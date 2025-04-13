@@ -1,6 +1,16 @@
 import type { ROLES } from '../../constants/roles'
 import type { IUser } from '../../models/auth/auth-user.model'
 
+export interface IUserDTO {
+	id: number
+	login: string
+	email: string
+	isActivated: boolean
+	role: ROLES
+	createdAt: string | Date
+	updatedAt: string | Date
+}
+
 export class UserDTO {
 	id: number
 	login: string
@@ -19,4 +29,17 @@ export class UserDTO {
 		this.createdAt = model.created_at
 		this.updatedAt = model.updated_at
 	}
+
+	toPlain(): IUserDTO {
+		return {
+			id: this.id,
+			login: this.login,
+			email: this.email,
+			isActivated: this.isActivated,
+			role: this.role,
+			createdAt: this.createdAt,
+			updatedAt: this.updatedAt
+		}
+	}
 }
+

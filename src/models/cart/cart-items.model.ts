@@ -123,7 +123,7 @@ export const deleteModelCartItems = async (
 	try {
 		await client.query('BEGIN')
 
-		const checkQuery: string = `SELECT * FROM ${dbTableCartItems} WHERE id = $1`
+		const checkQuery: string = `SELECT * FROM ${dbTableCartItems} WHERE product_id = $1`
 		const checkResult: QueryResult<ICartItems> = await pool.query(checkQuery, [
 			id,
 		])
@@ -132,7 +132,7 @@ export const deleteModelCartItems = async (
 			return logAndThrowNotFound(`Cart-items с id=${id} не найдена из model`)
 		}
 
-		const sqlQuery: string = `DELETE FROM ${dbTableCartItems} WHERE id = $1`
+		const sqlQuery: string = `DELETE FROM ${dbTableCartItems} WHERE product_id = $1`
 		await pool.query(sqlQuery, [id])
 		await client.query('COMMIT')
 

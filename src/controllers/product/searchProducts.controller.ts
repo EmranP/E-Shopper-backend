@@ -10,11 +10,6 @@ export const searchProductsController: RequestHandler = async (
 	try {
 		const { search = '', limit = 10, offset = 0 } = req.query
 
-		if (!search) {
-			res.status(400).json({ message: 'Поисковый запрос обязателен' })
-			return
-		}
-
 		const products = await productService.searchProducts(
 			String(search),
 			Number(limit),

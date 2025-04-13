@@ -30,7 +30,7 @@ routerCarts.post(
 routerCarts.delete(
 	'/remove/:cartId',
 	authenticated,
-	hasRole([ROLES.CUSTOMER, ROLES.ADMIN]),
+	hasRole([ROLES.ADMIN]),
 	removeCartController
 )
 

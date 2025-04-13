@@ -14,6 +14,11 @@ export interface IProductDTO {
 	searchVector: string
 }
 
+export interface ISearchProductsDTO {
+	products: IProductDTO[]
+	total: number
+}
+
 export class ProductsDTO {
 	id: number
 	name: string
@@ -37,7 +42,7 @@ export class ProductsDTO {
 		this.createdAt = model.created_at
 		this.updatedAt = model.updated_at
 		this.imageUrl = model.image_url
-		this.userId = model.user_id
+		this.userId = model.user_id as number
 		this.searchVector = model.search_vector
 	}
 

@@ -6,7 +6,7 @@ import {
 	getModelUsers,
 	updatedModelUser,
 } from '../../models/users/user.model'
-import { UserDTO } from '../../utils/dtos/user-dto.utils'
+import { UserDTO, type IUserDTO } from '../../utils/dtos/user-dto.utils'
 import { ApiError } from '../../utils/exists-error.utils'
 import logger from '../../utils/logger.utils'
 
@@ -15,14 +15,17 @@ export interface IUserService {
 }
 
 class UserServices {
-	async getAllUsers(): Promise<IUser[]> {
+	async getAllUsers(): Promise<IUserDTO[]> {
 		const users = await getModelUsers()
 
 		if (!users?.length) {
 			throw ApiError.BadRequest('Пользователи не найдены')
 		}
 
-		return users
+		const usersDTOs = users.map(user => new UserDTO(user))
+		const plainUsers = usersDTOs.map(dto => dto.toPlain())
+
+		return plainUsers
 	}
 
 	async getUserById(userId: number | string): Promise<IUser | null> {
