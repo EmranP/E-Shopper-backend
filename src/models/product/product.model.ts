@@ -22,6 +22,11 @@ export interface IResponseProductAPI {
 	image_url: string
 	search_vector: string
 }
+
+export interface IResponseSearch {
+	products: IResponseProductAPI[]
+	total: number
+}
 // GET
 export const getAllModelProducts = async (): Promise<IResponseProductAPI[]> => {
 	try {
@@ -75,31 +80,52 @@ export const searchModelProducts = async (
 	search: string,
 	limit: number,
 	offset: number
-): Promise<IResponseProductAPI[] | null> => {
+): Promise<IResponseSearch | null> => {
 	try {
-		const sqlQuery = `
-		SELECT *, ts_rank(search_vector, plainto_tsquery($1)) AS rank
-		FROM ${dbTableProducts}
-		WHERE search_vector @@ plainto_tsquery($1)
-		ORDER BY rank DESC
-		LIMIT $2 OFFSET $3;`
+		let sqlQuery: string
+		let values: (string | number)[]
+		let countQuery: string
+    let countValues: (string | number)[]
 
-		const values = [search, limit, offset]
-		console.log(values)
-		const sqlResult: QueryResult<IResponseProductAPI> = await pool.query(
-			sqlQuery,
-			values
-		)
 
-		if (sqlResult.rowCount === 0) {
+		if (search) {
+			sqlQuery = `
+				SELECT *, ts_rank(search_vector, plainto_tsquery($1)) AS rank
+				FROM ${dbTableProducts}
+				WHERE search_vector @@ plainto_tsquery($1)
+				ORDER BY rank DESC
+				LIMIT $2 OFFSET $3;`
+
+			values = [search, limit, offset]
+
+			countQuery = `SELECT COUNT(*) FROM ${dbTableProducts} WHERE search_vector @@ plainto_tsquery($1)`
+      countValues = [search]
+		} else {
+			sqlQuery = `SELECT * FROM ${dbTableProducts} ORDER BY created_at DESC
+				LIMIT $1 OFFSET $2`
+			values = [limit, offset]
+
+			countQuery = `SELECT COUNT(*) FROM ${dbTableProducts}`
+      countValues = []
+		}
+
+		const [productsResult, countResult] = await Promise.all([
+      pool.query<IResponseProductAPI>(sqlQuery, values),
+      pool.query<{count: string}>(countQuery, countValues),
+    ])
+
+		if (productsResult.rowCount === 0) {
 			logger.warn(`По запросу '${search}' ничего не найдено.`)
 			return null
 		}
 
 		logger.info(
-			`Найдено ${sqlResult.rowCount} продуктов по запросу '${search}'.`
+			`Найдено ${productsResult.rowCount} продуктов по запросу '${search}'.`
 		)
-		return sqlResult.rows
+		return {
+      products: productsResult.rows,
+      total: Number(countResult.rows[0].count),
+    }
 	} catch (error) {
 		logAndThrow(`Ошибка базы данных: невозможно выполнить поиск.`, error)
 		return null

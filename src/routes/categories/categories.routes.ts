@@ -15,7 +15,7 @@ routerCategories.get('/:categoryId', getCategoryByIdController)
 routerCategories.post(
 	'/add',
 	authenticated,
-	hasRole([ROLES.CUSTOMER]),
+	hasRole([ROLES.ADMIN]),
 	addCategoriesController
 )
 routerCategories.patch(
