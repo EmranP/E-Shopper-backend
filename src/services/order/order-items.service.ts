@@ -1,7 +1,6 @@
 import { ROLES } from '../../constants/roles'
 import type { IDeleteResponse } from '../../models/cart/carts.model'
 import {
-	createModelOrderItems,
 	deleteModelOrderItems,
 	editModelOrderItems,
 	getModelOrderItems,
@@ -70,27 +69,6 @@ class OrderItemsService {
 		}
 
 		return new OrderItemsDTO(orderItem).toPlain()
-	}
-
-	async createOrderItems(
-		itemData: Partial<IOrderItems>
-	): Promise<IOrderItemsDTO> {
-		if (
-			!itemData.order_id ||
-			!itemData.product_id ||
-			!itemData.quantity ||
-			!itemData.price
-		) {
-			return logAndThrow('Ошибка в данных для создания товара.')
-		}
-
-		const newOrderItems = await createModelOrderItems(itemData)
-
-		if (!newOrderItems) {
-			return logAndThrow('Ошибка при создании нового заказа товара.')
-		}
-
-		return new OrderItemsDTO(newOrderItems).toPlain()
 	}
 
 	async updateOrderItems(
