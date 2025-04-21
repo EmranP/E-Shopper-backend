@@ -11,12 +11,17 @@ export const createOrdersController: RequestHandler = async (
 ): Promise<void> => {
 	try {
 		const userId = req.user?.id
-		const { total_price, id: cartId } = req.body as Partial<IOrders & ICarts>
+		const { total_price, id } = req.body as Partial<IOrders & ICarts>
+
+		if (!total_price || !id) {
+			res.status(404).json({message: 'User not write date'})
+			return
+		}
 
 		const newOrders = await ordersService.createOrders(
-			userId as number,
-			cartId as number,
-			total_price as number
+			userId,
+			id,
+			total_price
 		)
 
 		if (!newOrders) {
