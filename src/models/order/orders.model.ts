@@ -1,11 +1,16 @@
 import type { QueryResult } from 'pg'
 import { pool } from '../../config/db.config'
-import { dbTableOrders } from '../../constants/db-table-name'
+import {
+	dbTableCartItems,
+	dbTableOrderItems,
+	dbTableOrders,
+} from '../../constants/db-table-name'
 import {
 	logAndThrow,
 	logAndThrowNotFound,
 } from '../../utils/log-and-throw.utils'
 import logger from '../../utils/logger.utils'
+import type { ICartItems } from '../cart/cart-items.model'
 import type { IDeleteResponse } from '../cart/carts.model'
 
 export interface IOrders {
@@ -75,28 +80,64 @@ export const getModelOrdersById = async (
 
 // POST
 export const createModelOrders = async (
-	userId: number | string,
+	userId: number | string | null,
+	cartId: number | string | null,
 	totalPrice: number
 ): Promise<IOrders> => {
+	const client = await pool.connect()
 	try {
-		const sqlQuery: string = `
+		await client.query('BEGIN')
+
+		const cartItemsQuery = `SELECT * FROM ${dbTableCartItems} WHERE cart_id = $1`
+		const cartItemsResult = await client.query<ICartItems>(cartItemsQuery, [
+			cartId,
+		])
+
+		if (cartItemsResult.rowCount === 0) {
+			return logAndThrowNotFound(`Корзина с id=${cartId} пуста или не найдена`)
+		}
+
+		const orderQuery: string = `
 		INSERT INTO ${dbTableOrders} (user_id, total_price) 
 		VALUES($1, $2)
 		RETURNING *;
 		`
-		const sqlResult: QueryResult<IOrders> = await pool.query(sqlQuery, [
+		const orderResult = await pool.query<IOrders>(orderQuery, [
 			userId,
 			totalPrice,
 		])
 
-		if (!sqlResult.rows[0]) {
+		const order = orderResult.rows[0]
+
+		if (!order) {
 			return logAndThrow('Ошибка при создании заказа')
 		}
 
-		logger.info(`Новый заказ с id=${sqlResult.rows[0].id} успешно создан.`)
-		return sqlResult.rows[0]
+		for (const item of cartItemsResult.rows) {
+			const orderItemQuery = `
+        INSERT INTO ${dbTableOrderItems} (order_id, product_id, quantity, price)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *;
+      `
+			await client.query(orderItemQuery, [
+				order.id,
+				item.product_id,
+				item.quantity,
+				item.price,
+			])
+		}
+
+		const deleteCartItemsQuery = `DELETE FROM ${dbTableCartItems} WHERE cart_id = $1`
+		await client.query(deleteCartItemsQuery, [cartId])
+
+		await client.query('COMMIT')
+		logger.info(`Новый заказ с id=${order.id} успешно создан, корзина очищена.`)
+		return order
 	} catch (error) {
+		await client.query('COMMIT');
 		return logAndThrow('Ошибка при создании заказа', error)
+	} finally {
+		client.release()
 	}
 }
 
