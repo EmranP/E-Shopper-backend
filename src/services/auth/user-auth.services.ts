@@ -58,7 +58,7 @@ class UserAuthService {
 		}
 
 		await tokenService.saveToken(userDTO.id, tokens.refresh)
-		console.log(userDTO)
+
 		return {
 			...tokens,
 			user: userDTO,
@@ -129,7 +129,7 @@ class UserAuthService {
 		}
 
 		const userData = tokenService.validateRefreshToken(refreshToken) as IUser
-		console.log(userData)
+
 
 		if (!userData) {
 			logger.warn('Невалидный refresh token')
