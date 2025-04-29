@@ -11,6 +11,7 @@ import { ApiError } from '../../utils/exists-error.utils'
 class CartService {
 	async getCarts(): Promise<ICartsDTO[]> {
 		const carts = await getModelCarts()
+
 		if (!carts?.length) throw ApiError.NotFound('Carts не найдены из service.')
 
 		return carts.map(cart => new CartsDTO(cart).toPlain())

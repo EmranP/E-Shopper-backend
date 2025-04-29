@@ -1,6 +1,5 @@
 import { Router } from 'express'
 import { ROLES } from '../../constants/roles'
-import { addOrderItemsController } from '../../controllers/order/order-items/order-items.create.controller'
 import { removeOrderItemsForAdminController } from '../../controllers/order/order-items/order-items.delete.controller'
 import {
 	getOrderItemsByIdController,
@@ -85,13 +84,7 @@ routerOrders.get(
 	hasRole([ROLES.CUSTOMER, ROLES.ADMIN]),
 	getOrderItemsByIdController
 )
-// POST
-routerOrders.post(
-	'/items/add',
-	authenticated,
-	hasRole([ROLES.CUSTOMER, ROLES.ADMIN]),
-	addOrderItemsController
-)
+
 // PATCH
 routerOrders.patch(
 	'/items/:itemId',

@@ -18,6 +18,8 @@ class CartItemsService {
 
 		const cartItems = await getModelCartItems(cartId)
 
+	console.log(cartItems)
+
 		if (!cartItems?.length) {
 			throw ApiError.NotFound('Элементы корзины не найдены в сервисе')
 		}
@@ -62,6 +64,7 @@ class CartItemsService {
 		if (!id) {
 			throw ApiError.NotFound('Требуется ID элемента корзины')
 		}
+
 
 		const removeCartItems = await deleteModelCartItems(id)
 

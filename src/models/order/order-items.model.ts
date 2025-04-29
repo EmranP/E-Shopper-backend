@@ -87,27 +87,7 @@ export const getModelOrderItemsById = async (
 		)
 	}
 }
-// POST
-export const createModelOrderItems = async (
-	itemData: Partial<IOrderItems>
-): Promise<IOrderItems> => {
-	try {
-		const { order_id, product_id, quantity, price } = itemData
-		const sqlQuery: string = `
-		INSERT INTO ${dbTableOrderItems} 
-		(order_id, product_id, quantity, price)
-		VALUES($1, $2, $3, $4)
-		RETURNING *;
-		`
-		const values = [order_id, product_id, quantity, price]
-		const sqlResult = await pool.query<IOrderItems>(sqlQuery, values)
 
-		logger.info(`Успешно добавлен заказ товара для заказа с ID: ${order_id}.`)
-		return sqlResult.rows[0]
-	} catch (error) {
-		return logAndThrow('Не удалось создать заказ товара.', error)
-	}
-}
 // PATCH
 export const editModelOrderItems = async (
 	itemId: string | number,

@@ -60,14 +60,16 @@ class OrdersService {
 	}
 
 	async createOrders(
-		userId: number | string,
+		userId: number | string | null | undefined,
+		cartId: number | string | null | undefined,
 		totalPrice: number
 	): Promise<IOrdersDTO> {
-		if (!userId) throw ApiError.UnauthorizedError()
+		if (!userId || !cartId) throw ApiError.UnauthorizedError()
+
 		if (!totalPrice || totalPrice <= 0)
 			throw ApiError.BadRequest('Неверная цена заказа.')
 
-		const newOrder = await createModelOrders(userId, totalPrice)
+		const newOrder = await createModelOrders(userId, cartId, totalPrice)
 
 		if (!newOrder) logAndThrow('Не удалось создать заказ.')
 
