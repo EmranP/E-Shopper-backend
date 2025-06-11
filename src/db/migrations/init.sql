@@ -127,6 +127,7 @@ CREATE TABLE IF NOT EXISTS public.reviews (
   updated_at TIMESTAMP DEFAULT now()
 );
 
+
 -- ========================
 -- 3. TRIGGERS
 -- ========================

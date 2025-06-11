@@ -81,6 +81,41 @@ export const createUser = async (
 		)
 	}
 }
+
+// POST Admin
+
+export const createAdmin = async (
+	login: string, 
+	email: string, 
+	password: string, 
+	activationLink: string,
+	isActivated: boolean,
+	roleId: number
+): Promise<IUser | undefined> => {
+	try {
+		const query  = `
+			INSERT INTO ${dbTableUsers} (name, email, password, activation_link ,is_activated, role)
+			VALUES ($1, $2, $3, $4, $5, $6)
+			ON CONFLICT (email) DO UPDATE SET
+				name = EXCLUDED.name,
+				email = EXCLUDED.email,
+				password = EXCLUDED.password,
+				is_activated = EXCLUDED.is_activated,
+				role = EXCLUDED.role
+			RETURNING *;
+		`
+
+		const queryParams =  [login, email, password, activationLink, isActivated, roleId]
+
+		const result = await pool.query<IUser>(query, queryParams)
+
+		return result.rows[0]
+	} catch (err) {
+		logger.error('Ошибка при создании пользователя:', err)
+		throw ApiError.BadRequest(`Database error: unable to create ${dbTableUsers}`)
+	}
+}
+
 // PATCH
 export const updateUserByIsActivated = async (
 	activationLink: string,
