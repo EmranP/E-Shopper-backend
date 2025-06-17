@@ -64,29 +64,31 @@ export const getModelCartById = async (
 // POST
 export const addModelCart = async (userId: number): Promise<ICarts> => {
 	try {
-		const existingCartQuery: string = `SELECT * FROM ${dbTableCarts} WHERE user_id = $1;`
-		const existingCartResult: QueryResult<ICarts> = await pool.query(
-			existingCartQuery,
-			[userId]
-		)
+		const sqlQuery: string = `
+			INSERT INTO ${dbTableCarts} (user_id)
+			VALUES($1)
+			ON CONFLICT (user_id) DO UPDATE SET
+				updated_at = NOW() -- Можно обновлять, чтобы показать, что корзина "активна"
+			RETURNING *;
+		`;
+		const sqlResult: QueryResult<ICarts> = await pool.query(sqlQuery, [userId]);
 
-		if (existingCartResult.rowCount && existingCartResult.rowCount > 0) {
-			logger.warn(`Пользователь с ID ${userId} уже имеет корзину.`)
-			return existingCartResult.rows[0]
+		// Если строка была вставлена, count > 0, если обновлена, rows[0] будет содержать данные
+		if (sqlResult.rowCount === 0) {
+			// Это маловероятно с RETURNING *, но для надежности
+			throw new Error('Не удалось создать или получить корзину.');
 		}
 
-		const sqlQuery: string = `INSERT INTO ${dbTableCarts} (user_id) VALUES($1) RETURNING *;`
-		const sqlResult: QueryResult<ICarts> = await pool.query(sqlQuery, [userId])
-
-		logger.info(`Корзина пользователя с ID'${userId}' успешно создан.`)
-		return sqlResult.rows[0]
+		logger.info(`Корзина пользователя с ID '${userId}' создана или получена.`);
+		return sqlResult.rows[0];
 	} catch (error) {
 		return logAndThrow(
-			`Ошибка базы данных: невозможно получить корзину.`,
+			`Ошибка базы данных: невозможно создать/получить корзину для пользователя ID ${userId}.`,
 			error
-		)
+		);
 	}
-}
+};
+
 
 // DELETE
 export const deleteModelCarts = async (

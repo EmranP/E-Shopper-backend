@@ -130,7 +130,6 @@ class UserAuthService {
 
 		const userData = tokenService.validateRefreshToken(refreshToken) as IUser
 
-
 		if (!userData) {
 			logger.warn('Невалидный refresh token')
 			throw ApiError.UnauthorizedError()

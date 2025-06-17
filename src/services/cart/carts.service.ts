@@ -1,5 +1,6 @@
 import {
 	addModelCart,
+	checkModelCartExistsForAdmin,
 	deleteModelCarts,
 	getModelCartById,
 	getModelCarts,
@@ -26,6 +27,7 @@ class CartService {
 
 		return new CartsDTO(cart).toPlain()
 	}
+
 
 	async addCart(userId: number): Promise<ICartsDTO> {
 		if (!userId) throw ApiError.UnauthorizedError()
