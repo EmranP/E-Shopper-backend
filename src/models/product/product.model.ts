@@ -23,16 +23,28 @@ export interface IResponseProductAPI {
 	search_vector: string
 }
 
-export interface IResponseSearch {
+export interface IResponseCommonProductAPI {
 	products: IResponseProductAPI[]
 	total: number
 }
 // GET
-export const getAllModelProducts = async (): Promise<IResponseProductAPI[]> => {
+export const getAllModelProducts = async (
+	limit: number, 
+	offset: number
+): Promise<IResponseCommonProductAPI> => {
 	try {
-		const sqlQuery: string = `SELECT * FROM ${dbTableProducts}`
-		const sqlResult: QueryResult<IResponseProductAPI> = await pool.query(
-			sqlQuery
+		const sqlQuery: string = `
+			SELECT * FROM ${dbTableProducts} 
+			ORDER BY created_at DESC 
+			LIMIT $1 OFFSET $2
+		`
+		const countQuery = `SELECT COUNT(*) FROM ${dbTableProducts}`
+
+		const [sqlResult, countResult] = await Promise.all(
+			[
+				pool.query<IResponseProductAPI>(sqlQuery, [limit, offset]),
+				pool.query<{ count: string }>(countQuery)
+			]
 		)
 
 		if (sqlResult.rowCount === 0) {
@@ -42,9 +54,12 @@ export const getAllModelProducts = async (): Promise<IResponseProductAPI[]> => {
 		}
 
 		logger.info(
-			`Успешное получение всех продуктов ${sqlResult.rowCount} записей)`
+			`Получено ${sqlResult.rowCount} продуктов (всего: ${countResult.rows[0].count})`
 		)
-		return sqlResult.rows
+		return {
+			products: sqlResult.rows,
+			total: Number(countResult.rows[0].count)
+		}
 	} catch (error) {
 		return logAndThrow(
 			`Ошибка базы данных: невозможно получить продукты.`,
@@ -52,6 +67,7 @@ export const getAllModelProducts = async (): Promise<IResponseProductAPI[]> => {
 		)
 	}
 }
+
 export const getModelProductById = async (
 	productId: string | number
 ): Promise<IResponseProductAPI> => {
@@ -80,7 +96,7 @@ export const searchModelProducts = async (
 	search: string,
 	limit: number,
 	offset: number
-): Promise<IResponseSearch | null> => {
+): Promise<IResponseCommonProductAPI | null> => {
 	try {
 		let sqlQuery: string
 		let values: (string | number)[]
