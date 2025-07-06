@@ -1,6 +1,5 @@
 import {
 	addModelCart,
-	checkModelCartExistsForAdmin,
 	deleteModelCarts,
 	getModelCartById,
 	getModelCarts,
