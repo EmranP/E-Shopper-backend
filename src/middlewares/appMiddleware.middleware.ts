@@ -22,6 +22,7 @@ export const defaultMiddleware = (
 			origin: process.env.CLIENT_URL,
 		})
 	)
+	// app.use(cors())
 
 	// Парсинг URL-кодированных данных
 	app.use(

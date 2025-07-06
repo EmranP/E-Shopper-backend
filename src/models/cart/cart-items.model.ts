@@ -91,11 +91,11 @@ export const editModelCartItems = async (
 
 		const sqlQuery: string = `
 		UPDATE ${dbTableCartItems} 
-		SET quantity = $1, price = $2
-		WHERE id = $3
+		SET quantity = $1
+		WHERE id = $2
 		RETURNING *;
 		`
-		const values = [quantity, price, id]
+		const values = [quantity, id]
 		const sqlResult: QueryResult<ICartItems> = await pool.query(
 			sqlQuery,
 			values
