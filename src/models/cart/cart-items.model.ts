@@ -81,21 +81,21 @@ export const editModelCartItems = async (
 	cartItemData: Partial<ICartItems>
 ): Promise<ICartItems> => {
 	try {
-		const { quantity, price } = cartItemData
+		const { quantity } = cartItemData
 
-		if (!quantity || !price) {
+		if (!quantity) {
 			return logAndThrow(
-				'Отсутствуют обязательные параметры: quantity или price.'
+				'Отсутствуют обязательные параметры: quantity.'
 			)
 		}
 
 		const sqlQuery: string = `
 		UPDATE ${dbTableCartItems} 
-		SET quantity = $1, price = $2
-		WHERE id = $3
+		SET quantity = $1
+		WHERE id = $2
 		RETURNING *;
 		`
-		const values = [quantity, price, id]
+		const values = [quantity, id]
 		const sqlResult: QueryResult<ICartItems> = await pool.query(
 			sqlQuery,
 			values

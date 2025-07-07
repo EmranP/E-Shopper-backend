@@ -14,7 +14,7 @@ export interface IProductDTO {
 	searchVector: string
 }
 
-export interface ISearchProductsDTO {
+export interface IProductsApiDTO {
 	products: IProductDTO[]
 	total: number
 }
