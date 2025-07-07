@@ -47,7 +47,7 @@ class CartItemsService {
 		id: number | string,
 		cartItemData: Partial<ICartItems>
 	): Promise<ICartItemsDTO> {
-		if (!id || !cartItemData.price || !cartItemData.quantity) {
+		if (!id  || !cartItemData.quantity) {
 			throw ApiError.BadRequest('ID или данные элемента корзины отсутствуют')
 		}
 

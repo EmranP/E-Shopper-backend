@@ -81,11 +81,11 @@ export const editModelCartItems = async (
 	cartItemData: Partial<ICartItems>
 ): Promise<ICartItems> => {
 	try {
-		const { quantity, price } = cartItemData
+		const { quantity } = cartItemData
 
-		if (!quantity || !price) {
+		if (!quantity) {
 			return logAndThrow(
-				'Отсутствуют обязательные параметры: quantity или price.'
+				'Отсутствуют обязательные параметры: quantity.'
 			)
 		}
 
