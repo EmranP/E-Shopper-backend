@@ -7,8 +7,16 @@ export const getCartItemsController: RequestHandler = async (
 	next
 ): Promise<void> => {
 	try {
+		const { limit = 'all', offset = 0 } = req.query as unknown as {
+			limit: number | 'all', 
+			offset: number
+		}
 		const cartId = req.params.cartId
-		const cartItemsData = await cartItemsService.getCartItems(cartId)
+		const cartItemsData = await cartItemsService.getCartItems(
+			cartId, 
+			limit, 
+			Number(offset)
+		)
 
 		res.status(200).json(cartItemsData)
 	} catch (error) {
