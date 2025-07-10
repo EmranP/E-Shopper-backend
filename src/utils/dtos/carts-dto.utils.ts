@@ -16,6 +16,7 @@ export interface ICartItemsDTO  {
 	productId: number | string
 	quantity: number | string
 	price: number
+	stock: number | null
 	createdAt: Date | string
 	updatedAt: Date | string
 	productCreatedAt: Date | string
@@ -62,6 +63,7 @@ export class CartItemsDTO {
 	protected name: string
 	private productCreatedAt: Date | string
 	private productUpdatedAt: Date | string
+	private stock: number | null
 
 
 	constructor(model: ICartItems) {
@@ -76,6 +78,7 @@ export class CartItemsDTO {
 		this.imageUrl = model.image_url
 		this.productCreatedAt = model.product_created_at
 		this.productUpdatedAt = model.product_updated_at
+		this.stock = model.stock
 
 	}
 
@@ -88,6 +91,7 @@ export class CartItemsDTO {
 			imageUrl: this.imageUrl,
 			quantity: this.quantity,
 			price: this.price,
+			stock: this.stock,
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
 			productCreatedAt: this.productCreatedAt,
