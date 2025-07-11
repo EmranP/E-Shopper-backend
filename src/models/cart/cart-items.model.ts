@@ -53,7 +53,7 @@ export const getModelCartItems = async (
 			ORDER BY ci.created_at DESC
 		`
 
-		const countQuery = `SELECT COUNT(*) FROM ${dbTableCartItems}`
+		const countQuery = `SELECT COUNT(*) FROM ${dbTableCartItems} WHERE cart_id = $1`
 
 		const params = [cartId]
 
@@ -64,7 +64,7 @@ export const getModelCartItems = async (
 
 		const [sqlResult, countResult] = await Promise.all([
 			pool.query<ICartItems>(sqlQuery, params),
-			pool.query<{count: string}>(countQuery)
+			pool.query<{count: string}>(countQuery, [cartId])
 		])
 
 
