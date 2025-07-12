@@ -54,7 +54,7 @@ export const getModelOrdersForCustomers = async (
 		logger.info(`Получениеы заказы для customers`)
 		return sqlResult.rows
 	} catch (error) {
-		return logAndThrow('Ошибка при получении заказов для admin', error)
+		return logAndThrow('Ошибка при получении заказов для customers', error)
 	}
 }
 
