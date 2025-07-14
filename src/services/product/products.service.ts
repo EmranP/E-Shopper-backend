@@ -11,7 +11,7 @@ import {
 import {
 	ProductsDTO,
 	type IProductDTO,
-    type ISearchProductsDTO,
+    type IProductsApiDTO,
 } from '../../utils/dtos/product-dto.utils'
 import { ApiError } from '../../utils/exists-error.utils'
 import {
@@ -22,18 +22,22 @@ import {
 import logger from '../../utils/logger.utils'
 
 class ProductService {
-	async getProducts(): Promise<IProductDTO[]> {
-		const productsData = await getAllModelProducts()
+	async getProducts(limit: number, offset: number): Promise<IProductsApiDTO> {
+		const { products, total } = await getAllModelProducts(limit, offset)
 
-		if (!productsData?.length) {
+		if (!products?.length) {
 			return logAndThrowNotFound('Продукты не найдены из services')
 		}
 
-		const productDTOs = productsData.map(product => new ProductsDTO(product))
+		const productDTOs = products.map(product => new ProductsDTO(product))
 		const plainProducts = productDTOs.map(dto => dto.toPlain())
 
 		logger.info('Продукты успешно получены из services')
-		return plainProducts
+
+		return {
+			products: plainProducts,
+			total
+		}
 	}
 
 	async getProductById(
@@ -57,7 +61,7 @@ class ProductService {
 		search: string,
 		limit: number,
 		offset: number
-	): Promise<ISearchProductsDTO> {
+	): Promise<IProductsApiDTO> {
 		const searchProducts = await searchModelProducts(search, limit, offset)
 
 		if (!searchProducts) {

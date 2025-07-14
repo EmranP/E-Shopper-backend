@@ -8,23 +8,37 @@ import {
 import type { IDeleteResponse } from '../../models/cart/carts.model'
 import {
 	CartItemsDTO,
+	type ICartItemsCommonApiDTO,
 	type ICartItemsDTO,
 } from '../../utils/dtos/carts-dto.utils'
 import { ApiError } from '../../utils/exists-error.utils'
 
 class CartItemsService {
-	async getCartItems(cartId: number | string): Promise<ICartItemsDTO[]> {
+	async getCartItems(
+		cartId: number | 
+		string, limit: number | 
+		"all", offset: number
+	): Promise<ICartItemsCommonApiDTO> {
 		if (!cartId) throw ApiError.UnauthorizedError()
 
-		const cartItems = await getModelCartItems(cartId)
+		if (limit !== 'all' && Number(limit) > 1000) {
+			throw ApiError.BadRequest('Слишком большой лимит')
+		}
 
-	console.log(cartItems)
+		const cartItemsData = await getModelCartItems(cartId, limit, offset)
 
-		if (!cartItems?.length) {
+		if (!cartItemsData?.cartItems.length) {
 			throw ApiError.NotFound('Элементы корзины не найдены в сервисе')
 		}
 
-		return cartItems.map(cartItem => new CartItemsDTO(cartItem).toPlain())
+		const cartItemsDto = cartItemsData.cartItems.map(
+			cartItem => new CartItemsDTO(cartItem).toPlain()
+		)
+
+		return {
+			cartItems: cartItemsDto,
+			total: cartItemsData.total
+		}
 	}
 
 	async addCartItems(
@@ -47,7 +61,7 @@ class CartItemsService {
 		id: number | string,
 		cartItemData: Partial<ICartItems>
 	): Promise<ICartItemsDTO> {
-		if (!id || !cartItemData.price || !cartItemData.quantity) {
+		if (!id  || !cartItemData.quantity) {
 			throw ApiError.BadRequest('ID или данные элемента корзины отсутствуют')
 		}
 
